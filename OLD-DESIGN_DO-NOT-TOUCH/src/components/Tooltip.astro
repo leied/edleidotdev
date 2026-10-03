@@ -1,0 +1,130 @@
+---
+/**
+ * Inline glossary term with a hover/focus tooltip.
+ * The term is a real <button> so it is reachable by keyboard and announced
+ * with its description (aria-describedby), not just paintable on hover.
+ */
+interface Props {
+  /** Plain tooltip copy. Omit and pass a `tip` slot for markup (e.g. live values). */
+  text?: string;
+  id?: string;
+}
+const { text, id } = Astro.props;
+const tipId = id ?? `tt-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<span class="tt">
+  <button type="button" class="tt__term" aria-describedby={tipId}>
+    <slot />
+  </button>
+  <span class="tt__bubble" id={tipId} role="tooltip">
+    {Astro.slots.has('tip') ? <slot name="tip" /> : text}
+  </span>
+</span>
+
+<style>
+  .tt {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tt__term {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: help;
+    text-decoration: underline dotted currentColor;
+    text-underline-offset: 0.25em;
+    text-decoration-thickness: 1px;
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .tt:hover .tt__term,
+  .tt__term:focus-visible {
+    color: var(--accent);
+  }
+
+  .tt__bubble {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    z-index: 40;
+    width: max-content;
+    max-width: min(38ch, 74vw);
+    padding: var(--space-1) var(--space-2);
+    background: var(--ink-0);
+    color: var(--ground);
+    font-size: var(--t-small);
+    line-height: 1.45;
+    text-transform: none;
+    letter-spacing: 0;
+    text-align: left;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(var(--baseline) * -0.5));
+    transition:
+      opacity var(--dur) var(--ease),
+      transform var(--dur) var(--ease),
+      visibility var(--dur) var(--ease);
+  }
+
+  /* A caret, drawn as a rotated square so it inherits the bubble's fill. */
+  .tt__bubble::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: var(--space-2);
+    width: 7px;
+    height: 7px;
+    background: inherit;
+    transform: rotate(45deg);
+  }
+
+  .tt:hover .tt__bubble,
+  .tt__term:focus-visible + .tt__bubble {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* Near the right edge of a text block, flip the bubble to hang left. */
+  .tt[data-align='end'] .tt__bubble {
+    left: auto;
+    right: 0;
+  }
+  .tt[data-align='end'] .tt__bubble::before {
+    left: auto;
+    right: var(--space-2);
+  }
+</style>
+
+<script>
+  // Flip a bubble to hang from its right edge when the default left-anchored
+  // position would push it past the viewport. Runs once per interaction, and
+  // one listener pair covers every tooltip on the page.
+  function align(tip: HTMLElement) {
+    const bubble = tip.querySelector<HTMLElement>('.tt__bubble');
+    if (!bubble) return;
+    tip.removeAttribute('data-align');
+    const rect = bubble.getBoundingClientRect();
+    if (rect.right > document.documentElement.clientWidth - 8) {
+      tip.setAttribute('data-align', 'end');
+    }
+  }
+
+  for (const event of ['pointerenter', 'focusin'] as const) {
+    document.addEventListener(
+      event,
+      (e) => {
+        const target = e.target as HTMLElement | null;
+        const tip = target?.closest?.('.tt');
+        if (tip instanceof HTMLElement) align(tip);
+      },
+      true,
+    );
+  }
+</script>

@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Hero from '../components/Hero.astro';
+import BarcodeRule from '../components/BarcodeRule.astro';
+import AboutMe from '../components/AboutMe.astro';
+import Projects from '../components/Projects.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+
+<Base
+  title="Edward L — edlei.dev"
+  description="Edward L — student at the University of Washington, building things in Seattle."
+>
+  <SiteHeader />
+  <main id="main">
+    <Hero />
+    <BarcodeRule />
+    <AboutMe />
+    <Projects />
+    <BarcodeRule />
+  </main>
+  <SiteFooter />
+</Base>

@@ -1,0 +1,761 @@
+---
+/**
+ * The cup in the Projects column.
+ *
+ * Stages, driven by `data-stage` on the root:
+ *   morph  — the cup draws in
+ *   pour   — blocks fall in under gravity, bounce, and stack up inside
+ *   lid    — the lid seats on top
+ *   shake  — the cup is grabbable: drag it and the contents rattle and resettle
+ *   fall   — the cup tips and drops out of frame, revealing the project cards
+ *
+ * The stacking is simulated, not keyframed: each block is an axis-aligned body
+ * with a vertical velocity that rests on whatever it lands on. That is what
+ * makes shaking possible — there is no timeline to fight, only state.
+ *
+ * Geometry lives in one place: the SVG viewBox is 200×260 and the HTML fill
+ * layer is clipped to the same trapezoid expressed in percentages.
+ */
+---
+
+<div class="cup" data-cup data-stage="idle" aria-hidden="true">
+  <div class="cup__rig" data-rig>
+    <div class="cup__lid">
+      <svg viewBox="0 0 200 46" preserveAspectRatio="none">
+        <path
+          d="M14 30 Q14 8 40 8 H160 Q186 8 186 30 Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="7"
+          stroke-linejoin="round"></path>
+        <rect
+          x="10"
+          y="30"
+          width="180"
+          height="12"
+          rx="3"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="7"></rect>
+      </svg>
+    </div>
+
+    <div class="cup__body" data-grab>
+      <div class="cup__fill" data-fill></div>
+      <svg class="cup__outline" viewBox="0 0 200 260" preserveAspectRatio="none">
+        <path
+          d="M34 8 L166 8 L140 252 L60 252 Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="7"
+          stroke-linejoin="round"></path>
+      </svg>
+    </div>
+  </div>
+
+  <p class="cup__label" data-label hidden></p>
+  <p class="cup__hint meta" data-hint>Drag to shake &middot; click a tile to open it</p>
+</div>
+
+<style>
+  .cup {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    align-content: center;
+    color: var(--ink-1);
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .cup[data-stage='morph'],
+  .cup[data-stage='pour'],
+  .cup[data-stage='lid'],
+  .cup[data-stage='shake'],
+  .cup[data-stage='fall'] {
+    visibility: visible;
+  }
+
+  /* Everything that moves as one object lives on the rig, so the fall and the
+     shake never fight over the same transform. */
+  .cup__rig {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    /* Negative gap: the lid's rim overlaps the cup mouth so it reads as seated. */
+    gap: calc(var(--baseline) * -1);
+    width: 100%;
+  }
+
+  .cup__lid {
+    width: min(74%, 420px);
+    opacity: 0;
+    transform: translateY(calc(var(--baseline) * -6));
+  }
+
+  .cup__lid svg {
+    width: 100%;
+    height: calc(var(--baseline) * 7);
+  }
+
+  .cup__body {
+    position: relative;
+    width: min(64%, 360px);
+    aspect-ratio: 200 / 260;
+  }
+
+  /* Decorative, and it covers the whole cup: an SVG root is hit-testable
+     across its entire box, so leaving it interactive would swallow every hover
+     aimed at the tiles underneath it. */
+  .cup__outline {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* Same trapezoid as the SVG path, in percentages of the 200×260 box. */
+  .cup__fill {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(17.5% 4%, 82.5% 4%, 69.5% 96%, 30.5% 96%);
+  }
+
+  /* Tiles are created and positioned by the simulation. */
+  .cup__fill :global(.blk) {
+    position: absolute;
+    bottom: 0;
+    background: var(--ground-2);
+    border: 1px solid var(--ink-3);
+    will-change: transform;
+    transition:
+      background-color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+
+  /* A tile that stands for a real project. It carries the accent so it reads as
+     reachable among the inert filler, and it is too small to say more than
+     that — clicking is what makes it break character and become a card. */
+  .cup__fill :global(.blk[data-project]) {
+    background: color-mix(in srgb, var(--accent) 16%, var(--ground-2));
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--ink-3));
+  }
+
+  .cup[data-stage='shake'] .cup__fill :global(.blk[data-project]) {
+    cursor: pointer;
+  }
+
+  .cup[data-stage='shake'] .cup__fill :global(.blk[data-project]:hover) {
+    background: color-mix(in srgb, var(--accent) 40%, var(--ground-2));
+    border-color: var(--accent-hi);
+  }
+
+  /* Name of the hovered tile, positioned against the tile each frame. */
+  .cup__label {
+    position: fixed;
+    z-index: 60;
+    margin: 0;
+    padding: calc(var(--baseline) * 0.5) var(--space-1);
+    background: var(--ink-0);
+    color: var(--ground);
+    font-size: var(--t-meta);
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(-50%, -120%);
+  }
+
+  .cup__label[hidden] { display: none; }
+
+  .cup__hint {
+    margin-top: var(--space-2);
+    color: var(--ink-3);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  .cup[data-stage='shake'] .cup__hint { opacity: 1; }
+  .cup[data-stage='shake'][data-held] .cup__hint { opacity: 0; }
+
+  /* Stage 1 — morph in */
+  .cup[data-stage='morph'],
+  .cup[data-stage='pour'],
+  .cup[data-stage='lid'],
+  .cup[data-stage='shake'] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-slow) var(--ease),
+      transform var(--dur-slow) var(--ease);
+  }
+
+  .cup[data-stage='idle'] {
+    opacity: 0;
+    transform: translateY(calc(var(--baseline) * 4)) scale(0.94);
+  }
+
+  /* Stage 3 — lid seats */
+  .cup[data-stage='lid'] .cup__lid,
+  .cup[data-stage='shake'] .cup__lid,
+  .cup[data-stage='fall'] .cup__lid {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity var(--dur) var(--ease),
+      transform var(--dur-slow) cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+
+  /* Stage 4 — grabbable. Only the cup and its lid take pointer events; the rest
+     of the overlay stays transparent to clicks. */
+  .cup[data-stage='shake'] .cup__body,
+  .cup[data-stage='shake'] .cup__lid {
+    pointer-events: auto;
+    cursor: grab;
+    /* Vertical scrolling still belongs to the page; horizontal drags shake. */
+    touch-action: pan-y;
+  }
+
+  .cup[data-stage='shake'][data-held] .cup__body,
+  .cup[data-stage='shake'][data-held] .cup__lid { cursor: grabbing; }
+
+  /* Springs back when released; follows the pointer 1:1 while held. */
+  .cup__rig { transition: transform var(--dur-slow) cubic-bezier(0.2, 1.3, 0.4, 1); }
+  .cup[data-held] .cup__rig { transition: none; }
+
+  /* Stage 5 — fall */
+  .cup[data-stage='fall'] {
+    opacity: 1;
+    animation: cup-fall 900ms cubic-bezier(0.5, 0, 0.9, 0.6) forwards;
+  }
+
+  @keyframes cup-fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    15% { transform: translateY(calc(var(--baseline) * -2)) rotate(-4deg); opacity: 1; }
+    100% { transform: translateY(120vh) rotate(26deg); opacity: 1; }
+  }
+
+  .cup[data-stage='done'] {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cup { display: none; }
+  }
+</style>
+
+<script>
+  /**
+   * Cup simulation.
+   *
+   * Tiles are rigid axis-aligned bodies with a vertical velocity. Each frame a
+   * body falls, then rests on the highest thing it overlaps — that is the whole
+   * model. Because the stack is state rather than a keyframed timeline, the cup
+   * can be shaken at any point and the contents resettle on their own.
+   *
+   * The cup mirrors the project list that is already on the page; the cards are
+   * the accessible path to every project, so this layer stays aria-hidden and
+   * pointer-only rather than duplicating controls in the tab order.
+   */
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const section = document.querySelector<HTMLElement>('[data-projects]');
+  const cup = document.querySelector<HTMLElement>('[data-cup]');
+  const rig = cup?.querySelector<HTMLElement>('[data-rig]');
+  const fill = cup?.querySelector<HTMLElement>('[data-fill]');
+  const label = cup?.querySelector<HTMLElement>('[data-label]');
+  const grab = cup?.querySelector<HTMLElement>('[data-grab]');
+
+  if (section && cup && rig && fill && label && grab && !REDUCED) {
+    section.setAttribute('data-cup-ready', '');
+
+    // --- constants -------------------------------------------------------
+    const GRAVITY = 2600; // px/s²
+    const RESTITUTION = 0.22;
+    const SLEEP_SPEED = 26; // px/s below which a resting body stops bouncing
+    const CONTACT_MIN = 0.22; // share of the narrower tile that must overlap to bear weight
+    const CONTACT_TOL = 1.5; // px of slack when deciding a body was above a surface
+    const MAX_RATTLE = 760; // px/s — about 1.4 tile-heights of lift per shake
+    const JOLT_INTERVAL = 50; // ms between impulses, so a fast drag cannot stack them
+    const ROWS = 6;
+    const SPAWN_STAGGER = 130; // ms between tiles entering
+    // Sum of tile widths, in cup-widths. Tiles stagger and overhang, so they
+    // pack at roughly 0.73 efficiency — this lands the settled stack a little
+    // below the rim rather than spilling tiles out of the top.
+    const AREA_TARGET = 3.5;
+    const IDLE_BEFORE_FALL = 6000; // ms of no interaction before the cup drops
+
+    type Body = {
+      el: HTMLElement;
+      x: number; // px from the left edge of the fill box
+      w: number;
+      h: number;
+      y: number; // px from the floor to the body's underside
+      vy: number;
+      spawnAt: number;
+      card: HTMLElement | null;
+      name: string;
+    };
+
+    let W = 0;
+    let H = 0;
+    let bodies: Body[] = [];
+    let running = false;
+    let last = 0;
+    let startedAt = 0;
+    let hovered: Body | null = null;
+    let idleTimer = 0;
+
+    const rand = (min: number, max: number) => min + Math.random() * (max - min);
+
+    function measure() {
+      const prevW = W;
+      const prevH = H;
+      // Layout box, not the painted one: the cup carries a scale transform
+      // while it morphs in, and measuring through that shrinks the whole
+      // simulation by 6% for the rest of its life.
+      W = fill!.offsetWidth;
+      H = fill!.offsetHeight;
+      if (prevW && prevH && bodies.length) {
+        // Keep the stack proportional when the column is resized.
+        const sx = W / prevW;
+        const sy = H / prevH;
+        for (const b of bodies) {
+          b.x *= sx;
+          b.w *= sx;
+          b.h *= sy;
+          b.y *= sy;
+        }
+      }
+    }
+
+    /**
+     * Tiles pour in anonymous. Identity is assigned once they settle, in
+     * assignProjects() — see the note there for why.
+     */
+    function build() {
+      const rowH = H / ROWS;
+      const made: Body[] = [];
+      let widthSum = 0;
+
+      while (widthSum < AREA_TARGET) {
+        const w = rand(0.28, 0.58) * W;
+        const el = document.createElement('div');
+        el.className = 'blk';
+        el.style.width = `${w}px`;
+        el.style.height = `${rowH}px`;
+        el.style.opacity = '0';
+        fill!.appendChild(el);
+        made.push({
+          el,
+          w,
+          h: rowH,
+          x: rand(0, Math.max(0, W - w)),
+          y: H + rowH + rand(0, H * 0.7),
+          vy: 0,
+          spawnAt: 0,
+          card: null,
+          name: '',
+        });
+        widthSum += w / W;
+      }
+
+      // Random pour order, so the cup fills unevenly rather than row by row.
+      const order = made.map((_, i) => i);
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+      order.forEach((bodyIndex, n) => {
+        made[bodyIndex].spawnAt = n * SPAWN_STAGGER;
+      });
+
+      bodies = made;
+    }
+
+    /**
+     * Turn the best-placed settled tiles into the project tiles.
+     *
+     * Doing this after the pour instead of before is the only way to guarantee
+     * a project tile is reachable. The fill layer is clipped at the cup rim and
+     * tiles resting at the same level can overlap, so any tile chosen up front
+     * may settle clipped or buried underneath a neighbour — an invisible link.
+     * Ranking the settled stack by how much of each tile is actually visible,
+     * and whether a click at its centre would really land on it, picks tiles
+     * that can be seen and hit. The tint arrives with the lid, which reads as
+     * the cup pointing out what is worth clicking.
+     */
+    function assignProjects() {
+      const cards = [...document.querySelectorAll<HTMLElement>('[data-card]')];
+      const fr = fill!.getBoundingClientRect();
+      const clipTop = fr.top + fr.height * 0.04;
+
+      const ranked = bodies
+        .map((b) => {
+          const r = b.el.getBoundingClientRect();
+          const top = Math.max(r.top, clipTop);
+          const visible = Math.max(0, r.bottom - top);
+
+          // Probe the tile's face the way a pointer would. A tile can be fully
+          // visible yet unreachable: tiles resting at the same level may
+          // overlap, and the later one in DOM order takes every hit.
+          let reachable = 0;
+          let probes = 0;
+          for (const fx of [0.3, 0.5, 0.7]) {
+            for (const fy of [0.3, 0.6]) {
+              const y = top + visible * fy;
+              if (visible <= 0 || y >= fr.bottom) continue;
+              probes++;
+              if (document.elementFromPoint(r.left + r.width * fx, y) === b.el) reachable++;
+            }
+          }
+
+          const hitRate = probes ? reachable / probes : 0;
+          return { b, score: visible * r.width * hitRate };
+        })
+        .sort((a, b) => b.score - a.score);
+
+      // If nothing scored — hit-testing blocked, every tile clipped — fall back
+      // to raw visible area so the projects are never left unassigned.
+      if (ranked.every((r) => r.score <= 0)) {
+        ranked.sort((a, b) => {
+          const ra = a.b.el.getBoundingClientRect();
+          const rb = b.b.el.getBoundingClientRect();
+          return rb.bottom - rb.top - (ra.bottom - ra.top);
+        });
+      }
+
+      cards.forEach((card, i) => {
+        const pick = ranked[i];
+        if (!pick) return;
+        const name = card.querySelector('.card__name')?.textContent?.trim() ?? 'Project';
+        pick.b.card = card;
+        pick.b.name = name;
+        pick.b.el.dataset.project = '';
+        pick.b.el.dataset.name = name;
+      });
+    }
+
+    /**
+     * Highest surface `b` can land on this step.
+     *
+     * The test is swept: a surface counts if the body was above it at `fromY`,
+     * its position *before* integrating. Testing against the post-integration
+     * position instead lets a fast tile pass through a tile it should have
+     * landed on — at 2600 px/s² a body crosses a whole tile in one frame, so
+     * that mistake drops the entire stack to the floor.
+     *
+     * A sliver of overlap is not a shelf. A surface only supports the body if
+     * they share at least CONTACT_MIN of the narrower one's width; anything
+     * less and the tile slips past into the gap, which is what produces the
+     * staggered brick courses rather than neat columns.
+     */
+    function supportUnder(b: Body, fromY: number) {
+      let support = 0;
+      for (const other of bodies) {
+        if (other === b) continue;
+        const overlap = Math.min(b.x + b.w, other.x + other.w) - Math.max(b.x, other.x);
+        if (overlap < Math.max(4, CONTACT_MIN * Math.min(b.w, other.w))) continue;
+        const top = other.y + other.h;
+        if (top <= fromY + CONTACT_TOL && top > support) support = top;
+      }
+      return support;
+    }
+
+    function draw(b: Body) {
+      b.el.style.transform = `translate3d(${b.x}px, ${-b.y}px, 0)`;
+    }
+
+    function step(now: number) {
+      if (!running) return;
+      const dt = Math.min(0.032, (now - last) / 1000) || 0;
+      last = now;
+      const elapsed = now - startedAt;
+
+      // Lowest first: a body's support is resolved before anything resting on
+      // it moves, so a settled stack stays settled instead of jittering apart.
+      bodies.sort((a, b) => a.y - b.y);
+
+      for (const b of bodies) {
+        if (elapsed < b.spawnAt) continue;
+        if (b.el.style.opacity !== '1') b.el.style.opacity = '1';
+
+        const fromY = b.y;
+        b.vy -= GRAVITY * dt;
+        let nextY = b.y + b.vy * dt;
+
+        const support = supportUnder(b, fromY);
+        if (nextY <= support) {
+          nextY = support;
+          // Bounce while it still has speed to spend, then sleep on contact.
+          if (b.vy < -SLEEP_SPEED) b.vy = -b.vy * RESTITUTION;
+          else b.vy = 0;
+        }
+
+        // The lid is a real surface. A tile already inside the cup cannot leave
+        // through the top however hard the cup is shaken — it hits the rim and
+        // drops back. Tiles still falling in from above (fromY past the rim)
+        // are unaffected, which is what lets the pour happen at all.
+        const ceiling = H - b.h;
+        if (fromY <= ceiling + CONTACT_TOL && nextY > ceiling) {
+          nextY = ceiling;
+          if (b.vy > 0) b.vy = -b.vy * RESTITUTION;
+        }
+
+        b.y = Math.min(nextY, H * 2.2);
+        draw(b);
+      }
+
+      if (hovered) positionLabel(hovered);
+      requestAnimationFrame(step);
+    }
+
+    function start() {
+      if (running) return;
+      running = true;
+      last = performance.now();
+      startedAt = last;
+      requestAnimationFrame(step);
+    }
+
+    // --- hover label -----------------------------------------------------
+    function positionLabel(b: Body) {
+      const rect = b.el.getBoundingClientRect();
+      label!.style.left = `${rect.left + rect.width / 2}px`;
+      label!.style.top = `${rect.top}px`;
+    }
+
+    fill.addEventListener('pointerover', (e) => {
+      if (cup.dataset.stage !== 'shake') return;
+      const el = (e.target as HTMLElement).closest<HTMLElement>('.blk[data-project]');
+      const body = bodies.find((b) => b.el === el);
+      if (!body) return;
+      hovered = body;
+      label!.textContent = body.name;
+      label!.hidden = false;
+      positionLabel(body);
+    });
+
+    fill.addEventListener('pointerout', (e) => {
+      const el = (e.target as HTMLElement).closest<HTMLElement>('.blk[data-project]');
+      if (!el) return;
+      hovered = null;
+      label!.hidden = true;
+    });
+
+    // --- shaking ---------------------------------------------------------
+    let holding = false;
+    let pointerId = -1;
+    let startX = 0;
+    let startY = 0;
+    let lastX = 0;
+    let lastMoveAt = 0;
+    let travelled = 0;
+
+    /**
+     * Kick every body upward and sideways — the rattle.
+     *
+     * Impulses are capped and rate-limited rather than summed. A fast drag
+     * fires pointermove every few milliseconds, and adding a fresh impulse each
+     * time launches the whole stack into the lid and holds it there; what you
+     * want from a shake is a jumble, not a lift-off.
+     */
+    let lastJoltAt = 0;
+
+    function jolt(force: number) {
+      const now = performance.now();
+      if (now - lastJoltAt < JOLT_INTERVAL) return;
+      lastJoltAt = now;
+
+      const f = Math.min(1, Math.abs(force) / 1400);
+      for (const b of bodies) {
+        b.vy = Math.min(MAX_RATTLE, b.vy + (260 + rand(0, 220)) * f);
+        b.x += rand(-1, 1) * 26 * f;
+        b.x = Math.max(0, Math.min(W - b.w, b.x));
+      }
+    }
+
+    function resetIdle() {
+      window.clearTimeout(idleTimer);
+      if (cup.dataset.stage !== 'shake') return;
+      idleTimer = window.setTimeout(drop, IDLE_BEFORE_FALL);
+    }
+
+    rig.addEventListener('pointerdown', (e) => {
+      if (cup.dataset.stage !== 'shake') return;
+      holding = true;
+      pointerId = e.pointerId;
+      startX = lastX = e.clientX;
+      startY = e.clientY;
+      lastMoveAt = performance.now();
+      travelled = 0;
+      cup.setAttribute('data-held', '');
+      // Capture keeps the drag alive outside the cup; not all pointers allow it.
+      try {
+        rig.setPointerCapture(e.pointerId);
+      } catch {
+        /* non-capturable pointer — the drag still works, just not off-element */
+      }
+      window.clearTimeout(idleTimer);
+    });
+
+    rig.addEventListener('pointermove', (e) => {
+      if (!holding || e.pointerId !== pointerId) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      travelled += Math.abs(e.clientX - lastX);
+
+      const clamp = (v: number, limit: number) => Math.max(-limit, Math.min(limit, v));
+      rig.style.transform = `translate(${clamp(dx, 70)}px, ${clamp(dy * 0.4, 28)}px)`;
+
+      const now = performance.now();
+      const dt = Math.max(8, now - lastMoveAt);
+      const speed = ((e.clientX - lastX) / dt) * 1000;
+      if (Math.abs(speed) > 260) jolt(speed);
+      lastX = e.clientX;
+      lastMoveAt = now;
+    });
+
+    function release(e: PointerEvent) {
+      if (!holding || e.pointerId !== pointerId) return;
+      holding = false;
+      cup.removeAttribute('data-held');
+      rig.style.transform = '';
+      jolt(320);
+      resetIdle();
+    }
+
+    rig.addEventListener('pointerup', release);
+    rig.addEventListener('pointercancel', release);
+
+    // Reading the tiles counts as interaction: the cup must not drop away while
+    // someone is still inside it looking around.
+    grab.addEventListener('pointerenter', () => window.clearTimeout(idleTimer));
+    grab.addEventListener('pointerleave', () => {
+      if (!holding) resetIdle();
+    });
+
+    // --- a tile breaks character and becomes its card --------------------
+    rig.addEventListener('click', (e) => {
+      if (cup.dataset.stage !== 'shake') return;
+      // A shake ends in a pointerup too; only a near-stationary press is a click.
+      if (travelled > 8) return;
+      const el = (e.target as HTMLElement).closest<HTMLElement>('.blk[data-project]');
+      const body = bodies.find((b) => b.el === el);
+      if (!body?.card) return;
+      expand(body);
+    });
+
+    function expand(body: Body) {
+      const card = body.card!;
+      const toggle = card.querySelector<HTMLButtonElement>('.card__toggle');
+      const from = body.el.getBoundingClientRect();
+
+      // Cards already occupy layout while hidden, so the target is measurable.
+      const to = card.getBoundingClientRect();
+
+      const ghost = body.el.cloneNode(true) as HTMLElement;
+      Object.assign(ghost.style, {
+        position: 'fixed',
+        left: `${from.left}px`,
+        top: `${from.top}px`,
+        width: `${from.width}px`,
+        height: `${from.height}px`,
+        margin: '0',
+        transform: 'none',
+        opacity: '1',
+        zIndex: '55',
+        pointerEvents: 'none',
+      });
+      document.body.appendChild(ghost);
+
+      label!.hidden = true;
+      hovered = null;
+      reveal();
+      card.setAttribute('data-open', '');
+      toggle?.setAttribute('aria-expanded', 'true');
+
+      ghost
+        .animate(
+          [
+            { transform: 'none', opacity: 1 },
+            {
+              transform: `translate(${to.left - from.left}px, ${to.top - from.top}px) scale(${
+                to.width / from.width
+              }, ${to.height / from.height})`,
+              opacity: 0,
+            },
+          ],
+          { duration: 520, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'forwards' },
+        )
+        .addEventListener('finish', () => ghost.remove());
+
+      drop();
+    }
+
+    // --- staging ---------------------------------------------------------
+    function reveal() {
+      section!.removeAttribute('data-cup-ready');
+      section!.setAttribute('data-cup-done', '');
+    }
+
+    function drop() {
+      if (cup.dataset.stage === 'fall' || cup.dataset.stage === 'done') return;
+      window.clearTimeout(idleTimer);
+      label!.hidden = true;
+      hovered = null;
+      cup.dataset.stage = 'fall';
+      window.setTimeout(() => {
+        cup.dataset.stage = 'done';
+        running = false;
+        reveal();
+      }, 760);
+    }
+
+    function play() {
+      measure();
+      build();
+      cup.dataset.stage = 'morph';
+      window.setTimeout(() => {
+        cup.dataset.stage = 'pour';
+        start();
+        const pourMs = bodies.length * SPAWN_STAGGER + 900;
+        window.setTimeout(() => {
+          cup.dataset.stage = 'lid';
+          window.setTimeout(() => {
+            // Order matters twice over. The stack has stopped bouncing by now,
+            // so what is reachable stays reachable — and the tiles only accept
+            // pointer events in the shake stage, so the stage has to be set
+            // before assignProjects() can hit-test anything.
+            cup.dataset.stage = 'shake';
+            assignProjects();
+            resetIdle();
+          }, 720);
+        }, pourMs);
+      }, 520);
+    }
+
+    window.addEventListener('resize', () => {
+      if (bodies.length) measure();
+    });
+
+    // Fires once, only when the visitor has actually reached the section.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            io.disconnect();
+            play();
+          }
+        }
+      },
+      { threshold: 0.3 },
+    );
+    io.observe(section);
+  }
+</script>

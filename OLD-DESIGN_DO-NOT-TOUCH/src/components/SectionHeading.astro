@@ -1,0 +1,48 @@
+---
+/**
+ * Section heading with a trailing hashtag anchor, so any section can be linked
+ * and shared directly.
+ */
+interface Props {
+  id: string;
+  title: string;
+}
+const { id, title } = Astro.props;
+---
+
+<div class="sh" id={id}>
+  <h2>{title}</h2>
+  <a class="sh__anchor" href={`#${id}`} aria-label={`Link to section: ${title}`}>#</a>
+</div>
+
+<style>
+  .sh {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+    scroll-margin-top: var(--space-section);
+  }
+
+  .sh__anchor {
+    font-family: var(--face-display);
+    font-size: clamp(1.6rem, 1rem + 2vw, 2.4rem);
+    line-height: 1;
+    color: var(--ink-3);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease), color var(--dur-fast) var(--ease);
+  }
+
+  .sh:hover .sh__anchor,
+  .sh__anchor:focus-visible {
+    opacity: 1;
+  }
+
+  .sh__anchor:hover { color: var(--accent); }
+
+  /* Touch devices get no hover: keep the anchor permanently visible there. */
+  @media (hover: none) {
+    .sh__anchor { opacity: 1; }
+  }
+</style>

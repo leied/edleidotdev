@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Placeholder">
+  <rect width="1600" height="900" fill="#1a1a1a"/>
+  <g stroke="#2a2a2a" stroke-width="1">
+    <path d="M0 150H1600M0 300H1600M0 450H1600M0 600H1600M0 750H1600"/>
+    <path d="M200 0V900M400 0V900M600 0V900M800 0V900M1000 0V900M1200 0V900M1400 0V900"/>
+  </g>
+  <g fill="#333">
+    <circle cx="1150" cy="300" r="110"/>
+    <path d="M960 900c0-160 85-270 190-270s190 110 190 270z"/>
+  </g>
+  <text x="80" y="820" fill="#3d3d3d" font-family="monospace" font-size="34" letter-spacing="6">PLACEHOLDER — REPLACE WITH PHOTO (SUBJECT RIGHT)</text>
+</svg>

@@ -1,0 +1,130 @@
+---
+import { timeline } from '../data/site';
+import SectionHeading from './SectionHeading.astro';
+
+/**
+ * The connector between nodes loosens as it descends — the dot gap grows with
+ * each step, so the line reads as trailing off rather than terminating.
+ */
+const gapForIndex = (i: number) => 8 + i * 8; // px between dot centres
+---
+
+<section class="about" aria-labelledby="about">
+  <div class="grid">
+    <div class="about__head">
+      <SectionHeading id="about" title="About Me" />
+    </div>
+
+    <ol class="tl">
+      {
+        timeline.map((item, i) => (
+          <li
+            class="tl__item"
+            id={item.id}
+            style={`--dot-gap:${gapForIndex(i)}px; --dot-fade:${1 - i * 0.28}`}
+          >
+            <span class="tl__node" aria-hidden="true" />
+            <div class="tl__body">
+              <h3 class="tl__title">{item.title}</h3>
+              <p class="meta tl__status">&lt;{item.status}&gt;</p>
+            </div>
+            <a class="tl__anchor" href={`#${item.id}`} aria-label={`Link to ${item.title}`}>
+              #
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .about {
+    padding-block: var(--space-section);
+  }
+
+  .about__head {
+    grid-column: 1 / -1;
+  }
+
+  .tl {
+    grid-column: 1 / span 6;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tl__item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding-bottom: var(--space-8);
+    scroll-margin-top: var(--space-section);
+  }
+
+  .tl__item:last-child {
+    padding-bottom: 0;
+  }
+
+  /* The dotted connector. Gap and opacity are set per item, so the line thins
+     as it approaches the bottom of the list. */
+  .tl__item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--baseline) * 2.5 - 1px);
+    top: calc(var(--baseline) * 5 + var(--space-1));
+    bottom: var(--space-1);
+    width: 2px;
+    background-image: radial-gradient(circle, var(--ink-3) 1px, transparent 1.2px);
+    background-size: 2px var(--dot-gap);
+    background-repeat: repeat-y;
+    opacity: var(--dot-fade);
+  }
+
+  .tl__node {
+    flex: none;
+    width: calc(var(--baseline) * 5);
+    height: calc(var(--baseline) * 5);
+    border: 2px solid var(--ink-1);
+    border-radius: 50%;
+    transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  }
+
+  .tl__item:hover .tl__node,
+  .tl__item:target .tl__node {
+    border-color: var(--accent);
+  }
+
+  .tl__body {
+    padding-top: var(--space-1);
+  }
+
+  .tl__title {
+    line-height: 1.2;
+  }
+
+  .tl__status {
+    margin-top: var(--space-1);
+  }
+
+  .tl__anchor {
+    margin-left: var(--space-1);
+    padding-top: var(--space-1);
+    color: var(--ink-3);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease), color var(--dur-fast) var(--ease);
+  }
+
+  .tl__item:hover .tl__anchor,
+  .tl__anchor:focus-visible { opacity: 1; }
+  .tl__anchor:hover { color: var(--accent); }
+
+  @media (hover: none) {
+    .tl__anchor { opacity: 1; }
+  }
+
+  @media (max-width: 860px) {
+    .tl { grid-column: 1 / -1; }
+  }
+</style>

@@ -1,0 +1,145 @@
+/* Small responses to exploration. Hover motion only runs with a precise pointer. */
+.replay-button .replay-glyph { font: 18px/1 'Roboto', sans-serif; }
+
+@media (prefers-reduced-motion: no-preference) {
+  :root { --ease-hover: cubic-bezier(.2, .7, .2, 1); }
+
+  .wordmark, .wordmark-dot, .name-period, .tiny-cross, .replay-glyph {
+    display: inline-block;
+    transition: transform 320ms var(--ease-hover), color 180ms;
+  }
+
+  .navigation :is(a, button), .footer-links :is(a, button), .project-links :is(a, button) {
+    position: relative;
+    transition: color 180ms, transform 220ms var(--ease-hover);
+  }
+
+  .navigation :is(a, button)::after,
+  .footer-links :is(a, button)::after,
+  .project-links :is(a, button)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -5px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 240ms var(--ease-hover);
+    pointer-events: none;
+  }
+
+  .navigation .icon, .footer-links .icon, .project-links .icon,
+  .hello-link .icon, .dialog-done .icon, .scroll-link .icon {
+    transition: transform 250ms var(--ease-hover), color 180ms;
+  }
+
+  .text-note, .hero-prose a {
+    background: linear-gradient(#cedc9720, #cedc9720) left bottom / 0% 100% no-repeat;
+    transition: background-size 240ms var(--ease-hover), color 180ms, border-color 180ms;
+  }
+
+  .portrait-placeholder {
+    transition: transform 450ms var(--ease-hover), opacity 350ms;
+  }
+  .portrait-frame, .future-project { transition: border-color 250ms, background-color 250ms; }
+  .scribble-arrow { transition: transform 400ms var(--ease-hover); }
+  .barcode { transition: transform 450ms var(--ease-hover); }
+
+  .timeline-node, .timeline-node > svg, .timeline-content, .section-anchor,
+  .proud-link, .proud-icon, .project-icon, .project-title, .future-icon {
+    transition: transform 280ms var(--ease-hover), color 220ms,
+      border-color 220ms, background-color 220ms, box-shadow 280ms;
+  }
+  .timeline-title h3 { transition: color 220ms; }
+  .margin-note, .margin-star, .sketch-paper, .sketch-browser {
+    transition: transform 420ms var(--ease-hover), color 250ms;
+  }
+  .project-card { transition: border-color 240ms, background-color 240ms, box-shadow 280ms; }
+  .hello-link, .back-top, .dialog-close, .menu-toggle, .dialog-done {
+    transition: transform 240ms var(--ease-hover), color 180ms,
+      background-color 180ms, border-color 180ms;
+  }
+  .replay-button { transition: color 180ms, opacity 180ms; }
+  .tooltip:not([hidden]) { animation: note-appear 180ms var(--ease-hover) both; }
+
+  /* Keyboard users get the same cues without needing a mouse. */
+  .navigation :is(a, button):focus-visible::after,
+  .footer-links :is(a, button):focus-visible::after,
+  .project-links :is(a, button):focus-visible::after { transform: scaleX(1); }
+  .text-note:focus-visible, .hero-prose a:focus-visible { background-size: 100% 100%; }
+  .timeline-item:focus-within .timeline-node {
+    transform: scale(1.1);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 5px #cedc970b;
+  }
+  .timeline-item:focus-within .timeline-content { transform: translateX(4px); }
+  .project-card:focus-within .project-icon { transform: rotate(-9deg) scale(1.05); }
+  .hello-link:focus-visible .icon, .dialog-done:focus-visible .icon { transform: translate(3px, -3px); }
+  .back-top:focus-visible { transform: translateY(-3px); }
+
+  @keyframes note-appear {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes underline-draw {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .wordmark:hover { transform: translateY(-2px); }
+  .wordmark:hover .wordmark-dot { transform: translate(2px, -4px) rotate(-12deg); }
+  h1:hover .name-period { transform: translateY(-5px) rotate(-9deg); }
+
+  .navigation :is(a, button):hover::after,
+  .footer-links :is(a, button):hover::after,
+  .project-links :is(a, button):hover::after { transform: scaleX(1); }
+  .navigation :is(a, button):hover .icon,
+  .footer-links :is(a, button):hover .icon,
+  .project-links :is(a, button):hover .icon { transform: translate(2px, -2px); }
+  .text-note:hover, .hero-prose a:hover { background-size: 100% 100%; }
+  .text-note:hover { border-color: var(--accent); }
+  .scroll-link:hover .icon { transform: translateY(5px); }
+
+  .portrait-placeholder:hover { transform: rotate(3deg) translateY(-5px); opacity: .92; }
+  .portrait-placeholder:hover .portrait-frame { border-color: #73805b; }
+  .portrait-placeholder:hover .scribble-arrow { transform: rotate(1deg) translate(-4px, -3px); }
+  .barcode-rule:hover .barcode { transform: translateX(-18px); }
+  .barcode-rule:hover .tiny-cross { transform: rotate(90deg); }
+
+  .section-anchor:hover { transform: translateY(-2px) rotate(-8deg); }
+  .timeline-item:hover .timeline-node {
+    transform: scale(1.1);
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #1e2418;
+    box-shadow: 0 0 0 5px #cedc970b;
+  }
+  .timeline-item:hover .timeline-node > svg { transform: rotate(-10deg); }
+  .timeline-item:hover .timeline-content { transform: translateX(4px); }
+  .timeline-item:hover h3 { color: var(--accent); }
+  .margin-note:hover { transform: rotate(-2deg) translateY(-3px); }
+  .margin-note:hover .margin-star { transform: rotate(105deg); color: var(--accent); }
+
+  .vibe-word:hover path { stroke-dasharray: 100; animation: underline-draw 400ms var(--ease-hover) both; }
+  .proud-link:hover { transform: translateX(4px); }
+  .proud-link:hover .proud-icon { transform: rotate(-12deg); background: #cedc970c; border-color: var(--accent); }
+  .project-card:hover { box-shadow: 0 8px 24px #0002; }
+  .project-card:hover .project-icon { transform: rotate(-9deg) scale(1.05); background: #cedc970c; }
+  .project-card:hover .project-title { transform: translateX(3px); }
+  .drawing-preview:hover .sketch-paper { transform: rotate(-2deg) translateY(-3px); }
+  .drawing-preview:hover .sketch-browser { transform: rotate(1deg) translateY(-2px); }
+  .future-project:hover { border-color: #677452; background: #cedc9705; }
+  .future-project:hover .future-icon { transform: rotate(90deg); border-color: #84956a; color: var(--accent); }
+  .replay-button:not(:disabled):hover .replay-glyph { transform: rotate(-65deg); }
+
+  .hello-link:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .hello-link:hover .icon, .dialog-done:hover .icon { transform: translate(4px, -4px); }
+  .back-top:hover { transform: translateY(-4px); background: #cedc970c; }
+  .dialog-close:hover { transform: rotate(90deg); }
+  .menu-toggle:hover { background: #cedc970c; }
+}

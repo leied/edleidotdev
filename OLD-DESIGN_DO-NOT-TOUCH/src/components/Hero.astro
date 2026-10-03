@@ -1,0 +1,224 @@
+---
+import { site, tooltips } from '../data/site';
+import Tooltip from './Tooltip.astro';
+
+// Build-time fallback so the clock is not blank before hydration.
+const initialTime = new Intl.DateTimeFormat('en-US', {
+  timeZone: site.timezone,
+  hour: 'numeric',
+  minute: '2-digit',
+}).format(new Date());
+---
+
+<section class="hero" id="top">
+  <div class="hero__media">
+    <!-- PLACEHOLDER: swap /images/hero.svg for a photo of you standing on the
+         right side of the frame. Keep the subject in the right third — the
+         copy occupies columns 1–7. -->
+    <img src="/images/hero.svg" alt="" aria-hidden="true" width="1600" height="900" />
+    <div class="hero__scrim"></div>
+  </div>
+
+  <div class="grid hero__inner">
+    <div class="hero__copy">
+      <p class="hero__greet">Hey there,</p>
+      <h1 class="hero__name">I&rsquo;m {site.name}</h1>
+
+      <p class="hero__facts">
+        <span class="fact">
+          <svg class="fact__icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5c0 3.3 4.5 8.5 4.5 8.5s4.5-5.2 4.5-8.5A4.5 4.5 0 0 0 8 1.5Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"></path>
+            <circle cx="8" cy="6" r="1.6" fill="none" stroke="currentColor" stroke-width="1.3"
+            ></circle>
+          </svg>
+          {site.location}
+        </span>
+
+        <span class="fact">
+          <svg class="fact__icon" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.3"
+            ></circle>
+            <path
+              d="M8 4.4V8l2.6 1.6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"></path>
+          </svg>
+          <Tooltip id="tip-clock">
+            <time data-clock datetime="">{initialTime}</time>
+            <Fragment slot="tip">
+              Timezone: {site.timezoneLabel}<br />
+              IANA ID: {site.timezone}<br />
+              Unix time: <span data-unix>—</span>
+            </Fragment>
+          </Tooltip>
+        </span>
+      </p>
+
+      <div class="hero__prose">
+        <p>
+          I am currently a <Tooltip text={tooltips.sophomore}>Sophomore</Tooltip>{' '}at the
+          University of Washington who&hellip;
+        </p>
+        <p>
+          &hellip; <Tooltip text={tooltips.intend}>intend</Tooltip>{' '}to major in{' '}<Tooltip
+            text={tooltips.cs}>CS</Tooltip
+          >{' '}and is open to collaborate on{' '}<Tooltip text={tooltips.researches}
+            >researches</Tooltip
+          >
+        </p>
+        <p>
+          &hellip; making <a href="#projects">things</a> on my side, perhaps you would find one
+          useful
+        </p>
+        <p>
+          &hellip; <a href="#about-extra">read</a> a lot during the day and hang out online at night
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    /* Above later sections so a tooltip opening near the bottom of the hero
+       paints over the barcode rule instead of behind it. */
+    z-index: 2;
+    /* The sticky header overlays the hero; --header-h is measured, so this
+       stays correct even when the nav wraps to two rows. */
+    margin-top: calc(-1 * var(--header-h));
+    padding-top: calc(var(--header-h) + var(--space-section));
+    padding-bottom: var(--space-8);
+    min-height: min(92vh, 900px);
+    display: flex;
+    align-items: flex-end;
+  }
+
+  /* Layer 3 (bottom): image */
+  /* Only the image layer clips — the copy layer must be free to overflow so
+     tooltips are not cut off at the section edge. */
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .hero__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 70% 30%;
+  }
+
+  /* Layer 2: black block at 80% — the sketch's <black-block-with-opacity=80> */
+  .hero__scrim {
+    position: absolute;
+    inset: 0;
+    background: var(--ground);
+    opacity: var(--scrim);
+  }
+
+  /* Layer 1 (top): text */
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero__copy {
+    grid-column: 1 / span 8;
+  }
+
+  .hero__greet {
+    font-weight: 700;
+    font-size: clamp(1.4rem, 0.9rem + 2vw, 2.4rem);
+    line-height: 1.1;
+    color: var(--ink-0);
+    margin-bottom: var(--space-1);
+  }
+
+  .hero__name {
+    font-family: var(--face-display);
+    font-size: var(--t-display);
+    line-height: var(--lh-display);
+    letter-spacing: -0.02em;
+    color: var(--ink-0);
+    margin-bottom: var(--space-3);
+  }
+
+  .hero__facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    font-size: var(--t-h3);
+    color: var(--ink-1);
+  }
+
+  .fact {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .fact__icon {
+    width: 1em;
+    height: 1em;
+    color: var(--ink-2);
+    flex: none;
+  }
+
+  .hero__prose p {
+    color: var(--ink-1);
+    max-width: var(--measure-text);
+  }
+
+  .hero__prose p:first-child {
+    margin-bottom: var(--space-1);
+  }
+
+  @media (max-width: 860px) {
+    .hero__copy { grid-column: 1 / -1; }
+    .hero__media img { object-position: 78% 25%; }
+    .hero__facts { gap: var(--space-3); font-size: var(--t-body); }
+  }
+</style>
+
+<script>
+  import { site } from '../data/site';
+
+  const clock = document.querySelector<HTMLTimeElement>('[data-clock]');
+  const unix = document.querySelector<HTMLElement>('[data-unix]');
+
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: site.timezone,
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
+  function tick() {
+    const now = new Date();
+    if (clock) {
+      clock.textContent = fmt.format(now);
+      clock.dateTime = now.toISOString();
+    }
+    if (unix) unix.textContent = String(Math.floor(now.getTime() / 1000));
+  }
+
+  tick();
+  // Align the first update to the top of the next second, then run once a second
+  // so the unix value in the tooltip is never more than a second stale.
+  const delay = 1000 - (Date.now() % 1000);
+  setTimeout(() => {
+    tick();
+    setInterval(tick, 1000);
+  }, delay);
+</script>

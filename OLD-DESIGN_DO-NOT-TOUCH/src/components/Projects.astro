@@ -1,0 +1,245 @@
+---
+import { projects } from '../data/site';
+import SectionHeading from './SectionHeading.astro';
+import CupPour from './CupPour.astro';
+
+const proud = projects.filter((p) => p.proud);
+---
+
+<section class="projects" aria-labelledby="projects" data-projects>
+  <div class="grid">
+    <div class="projects__head">
+      <SectionHeading id="projects" title="My Projects" />
+    </div>
+
+    <div class="projects__intro">
+      <p>
+        When I have free time, I just (vibe) code. Why? I don&rsquo;t know — I find it something I
+        genuinely enjoy doing.
+      </p>
+      <p>You can find a list of the random things I worked on on the right side:</p>
+      <p class="meta projects__hint">
+        Hover over a project to preview it. Click a project for more details.
+      </p>
+
+      <div class="proud">
+        <h3 class="proud__title">Specifically, here are the things I am mostly proud of:</h3>
+        <ul>
+          {
+            proud.map((p) => (
+              <li class="proud__item">
+                {/* PLACEHOLDER: swap for a per-project icon. */}
+                <span class="proud__icon" aria-hidden="true" />
+                <div>
+                  <p class="proud__name">
+                    <span class="meta">Name:</span> {p.name} &mdash; {p.headline}
+                  </p>
+                  <p class="proud__desc">{p.description}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="projects__rail">
+      <CupPour />
+      <ul class="cards" data-cards>
+        {
+          projects.map((p) => (
+            <li>
+              <article class="card" data-card>
+                <button
+                  class="card__toggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls={`detail-${p.id}`}
+                >
+                  {/* PLACEHOLDER: project icon goes in this circle. */}
+                  <span class="card__icon" aria-hidden="true" />
+                  <span class="card__text">
+                    <span class="card__name">{p.name}</span>
+                    <span class="card__headline">{p.headline}</span>
+                  </span>
+                </button>
+                <div class="card__detail" id={`detail-${p.id}`}>
+                  <div class="card__detail-inner">
+                    <p>{p.description}</p>
+                    {p.links && (
+                      <p class="card__links">
+                        {p.links.map((l, i) => (
+                          <>
+                            {i > 0 && <span aria-hidden="true"> — </span>}
+                            <a href={l.href}>{l.label}</a>
+                          </>
+                        ))}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </article>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .projects {
+    padding-block: var(--space-section);
+  }
+
+  .projects__head { grid-column: 1 / -1; }
+
+  .projects__intro {
+    grid-column: 1 / span 5;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .projects__hint { text-transform: none; letter-spacing: 0; }
+
+  .proud { margin-top: var(--space-6); }
+
+  .proud__title { margin-bottom: var(--space-3); }
+
+  .proud ul { display: flex; flex-direction: column; gap: var(--space-4); }
+
+  .proud__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .proud__icon {
+    flex: none;
+    width: calc(var(--baseline) * 2.5);
+    height: calc(var(--baseline) * 2.5);
+    margin-top: calc(var(--baseline) * 0.5);
+    border: 1.5px solid var(--ink-2);
+    border-radius: 50%;
+  }
+
+  .proud__name { font-size: var(--t-small); color: var(--ink-0); }
+  .proud__desc { font-size: var(--t-small); color: var(--ink-2); }
+
+  .projects__rail {
+    position: relative;
+    grid-column: 7 / -1;
+    min-height: calc(var(--baseline) * 60);
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .card {
+    background: var(--ground-1);
+    border: 1px solid var(--ground-2);
+    transition:
+      border-color var(--dur) var(--ease),
+      background-color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  .card:hover,
+  .card[data-open] {
+    border-color: var(--ink-3);
+    background: var(--ground-2);
+  }
+
+  .card__toggle {
+    appearance: none;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: none;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .card__icon {
+    flex: none;
+    width: calc(var(--baseline) * 4);
+    height: calc(var(--baseline) * 4);
+    border: 1.5px solid var(--ink-2);
+    border-radius: 50%;
+    transition: border-color var(--dur) var(--ease);
+  }
+
+  .card:hover .card__icon,
+  .card[data-open] .card__icon { border-color: var(--accent); }
+
+  .card__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .card__name { font-weight: 700; color: var(--ink-0); font-size: var(--t-small); }
+  .card__headline { font-size: var(--t-meta); color: var(--ink-2); }
+
+  /* 0fr → 1fr so the panel animates to its natural height without a fixed value. */
+  .card__detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows var(--dur) var(--ease), visibility var(--dur) var(--ease);
+  }
+
+  .card:hover .card__detail,
+  .card[data-open] .card__detail,
+  .card:focus-within .card__detail {
+    grid-template-rows: 1fr;
+    visibility: visible;
+  }
+
+  .card__detail-inner { overflow: hidden; }
+
+  .card__detail-inner > * {
+    padding-inline: calc(var(--space-2) + var(--baseline) * 4 + var(--space-2)) var(--space-2);
+    font-size: var(--t-meta);
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+
+  .card__detail-inner > *:last-child { padding-bottom: var(--space-2); }
+
+  .card__links { margin-top: var(--space-1); color: var(--ink-1); }
+  .card__links a { text-decoration-color: var(--ink-3); }
+
+  /* While the cup is playing, the cards stay out of the way. The attribute is
+     only ever set by the script, so no-JS visitors always see the cards. */
+  [data-projects][data-cup-ready] .cards {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+
+  [data-projects][data-cup-done] .cards {
+    opacity: 1;
+    transform: none;
+    transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+  }
+
+  @media (max-width: 860px) {
+    .projects__intro { grid-column: 1 / -1; }
+    .projects__rail { grid-column: 1 / -1; margin-top: var(--space-6); min-height: 0; }
+  }
+</style>
+
+<script>
+  // Project cards: hover previews are CSS; a click pins the card open.
+  document.querySelectorAll<HTMLElement>('[data-card]').forEach((card) => {
+    const toggle = card.querySelector<HTMLButtonElement>('.card__toggle');
+    toggle?.addEventListener('click', () => {
+      const open = card.toggleAttribute('data-open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+  });
+</script>

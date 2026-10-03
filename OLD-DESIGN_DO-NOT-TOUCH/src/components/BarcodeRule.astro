@@ -1,0 +1,41 @@
+---
+import { site } from '../data/site';
+
+/**
+ * Full-bleed separator set in Libre Barcode 39 Extended.
+ * White bars on the page's own black ground, per the sketch — the band segments
+ * the page without ever interrupting the field, and it encodes the site status.
+ * Repeated enough times to overflow any viewport; the excess is clipped.
+ */
+const REPEATS = 40;
+const payload = `*${site.barcodeText}*`;
+---
+
+<div class="rule" role="separator">
+  <span class="visually-hidden">{site.barcodeText}</span>
+  <span class="rule__bars" aria-hidden="true">
+    {Array.from({ length: REPEATS }, () => payload).join(' ')}
+  </span>
+</div>
+
+<style>
+  .rule {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    overflow: hidden;
+    height: calc(var(--baseline) * 6);
+    display: flex;
+    align-items: center;
+  }
+
+  .rule__bars {
+    font-family: var(--face-barcode);
+    font-size: calc(var(--baseline) * 6);
+    line-height: 1;
+    color: var(--ink-0);
+    white-space: nowrap;
+    user-select: none;
+    /* Pull the glyph box up so the bars are optically centred in the strip. */
+    transform: translateY(-0.08em);
+  }
+</style>

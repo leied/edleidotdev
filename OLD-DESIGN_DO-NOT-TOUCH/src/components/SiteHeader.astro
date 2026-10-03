@@ -1,0 +1,121 @@
+---
+import { site, nav } from '../data/site';
+---
+
+<header class="hdr" data-header>
+  <div class="grid hdr__inner">
+    <a class="hdr__mark" href="#top">{site.name}</a>
+    <nav class="hdr__nav" aria-label="Primary">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                target={item.external ? '_blank' : undefined}
+                rel={item.external ? 'noopener noreferrer' : undefined}
+              >
+                {item.label}
+                {item.external && <span class="hdr__ext" aria-hidden="true">↗</span>}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding-block: var(--space-3);
+    transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    border-bottom: 1px solid transparent;
+  }
+
+  /* Solid only once the hero image is no longer behind it. */
+  .hdr[data-stuck] {
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom-color: var(--ink-3);
+  }
+
+  .hdr__inner {
+    align-items: baseline;
+  }
+
+  .hdr__mark {
+    grid-column: 1 / span 4;
+    font-weight: 700;
+    font-size: var(--t-body);
+    letter-spacing: 0.01em;
+    color: var(--ink-0);
+    text-decoration: none;
+  }
+
+  .hdr__nav {
+    grid-column: 5 / -1;
+  }
+
+  .hdr__nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-3);
+  }
+
+  .hdr__nav a {
+    font-size: var(--t-small);
+    color: var(--ink-1);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .hdr__nav a:hover { color: var(--accent); }
+
+  .hdr__ext {
+    font-size: 0.75em;
+    vertical-align: 0.35em;
+    margin-left: 0.15em;
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 860px) {
+    .hdr__mark { grid-column: 1 / span 2; }
+    .hdr__nav { grid-column: 3 / -1; }
+    .hdr__nav ul { gap: var(--space-2); }
+  }
+
+  /* Below this the nav cannot share a row with the wordmark without ragging,
+     so it takes its own row, still flush left. */
+  @media (max-width: 560px) {
+    .hdr__mark,
+    .hdr__nav { grid-column: 1 / -1; }
+    .hdr__nav { margin-top: var(--space-1); }
+    .hdr__nav ul { justify-content: flex-start; gap: var(--space-2); }
+    .hdr__nav a { font-size: var(--t-meta); letter-spacing: var(--track-meta); }
+  }
+</style>
+
+<script>
+  // Sentinel-free: the header is solid as soon as the page has scrolled past
+  // one viewport-independent threshold — the height of the header itself.
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  if (header) {
+    // Publish the real header height so the hero can sit under it exactly.
+    const publishHeight = () =>
+      document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
+    publishHeight();
+    new ResizeObserver(publishHeight).observe(header);
+
+    const sync = () => {
+      if (window.scrollY > header.offsetHeight) header.setAttribute('data-stuck', '');
+      else header.removeAttribute('data-stuck');
+    };
+    sync();
+    window.addEventListener('scroll', sync, { passive: true });
+  }
+</script>

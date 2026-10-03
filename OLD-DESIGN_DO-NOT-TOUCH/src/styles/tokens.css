@@ -1,0 +1,68 @@
+/* Design tokens. See DESIGN.md — no magic numbers anywhere else in the codebase. */
+
+:root {
+  /* Grid */
+  --baseline: 8px;
+  --gutter: 24px;
+  --measure-max: 1280px;
+  --measure-text: 66ch;
+  --columns: 12;
+
+  /* Vertical rhythm */
+  --space-1: calc(var(--baseline) * 1);   /*  8 */
+  --space-2: calc(var(--baseline) * 2);   /* 16 */
+  --space-3: calc(var(--baseline) * 3);   /* 24 */
+  --space-4: calc(var(--baseline) * 4);   /* 32 */
+  --space-6: calc(var(--baseline) * 6);   /* 48 */
+  --space-8: calc(var(--baseline) * 8);   /* 64 */
+  --space-section: calc(var(--baseline) * 12); /* 96 */
+
+  /* Type scale — minor third from 16px, fluid between 360px and 1280px */
+  --t-meta: 0.75rem;
+  --t-small: 0.875rem;
+  --t-body: 1rem;
+  --t-h3: 1.2rem;
+  --t-h2: clamp(2.488rem, 1.6rem + 3.9vw, 4.3rem);
+  --t-display: clamp(2.986rem, 1.4rem + 7vw, 6.2rem);
+
+  --lh-tight: 1;
+  --lh-display: 1.04;
+  --lh-body: 1.5;          /* 24px on 16px body = 3 baseline units */
+  --track-meta: 0.08em;
+
+  /* Faces */
+  --face-body: 'Roboto', system-ui, sans-serif;
+  --face-display: 'Archivo Black', 'Roboto', system-ui, sans-serif;
+  --face-barcode: 'Libre Barcode 39 Extended', monospace;
+
+  /* Color */
+  --ink-0: #ffffff;
+  --ink-1: #e6e6e6;
+  --ink-2: #9a9a9a;
+  --ink-3: #5a5a5a;
+  --ground: #0a0a0a;
+  --ground-1: #141414;
+  --ground-2: #1c1c1c;
+  --accent: #2d9fae;
+  --accent-hi: #4cadba;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur: 240ms;
+  --dur-slow: 640ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Measured at runtime by SiteHeader; this is the one-row fallback. */
+  --header-h: 72px;
+
+  /* Depth of the hero scrim, per the sketch's layer note */
+  --scrim: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
+}
