@@ -45,8 +45,12 @@ svg { display: block; flex-shrink: 0; }
 
 /* A quiet navigation above the much louder introduction. */
 .site-header { display: flex; align-items: center; padding: 0 var(--inset); height: 100px; border-bottom: 1px solid var(--line); position: relative; z-index: 5; }
+.header-brand { position: relative; flex-shrink: 0; }
 .wordmark { font-size: 24px; font-weight: 700; letter-spacing: -1.1px; white-space: nowrap; }
 .wordmark-dot { color: var(--accent); }
+.wordmark-greeting { position: absolute; left: calc(100% + 18px); top: 50%; translate: 0 -50%; color: var(--accent); font-size: var(--text-small); font-style: italic; white-space: nowrap; pointer-events: none; opacity: 0; visibility: hidden; transform: translate(-6px, 3px); }
+.header-brand.is-greeting .wordmark-greeting { opacity: 1; visibility: visible; transform: translate(0, 0); }
+.header-brand.is-greeting + .header-note { visibility: hidden; }
 .header-note { margin-left: 25px; padding-left: 25px; border-left: 1px solid var(--line); font: var(--text-caption)/1.5 var(--mono); letter-spacing: 1.1px; color: var(--muted); max-width: 170px; }
 .navigation { display: flex; align-items: center; gap: 29px; margin-left: auto; }
 .navigation a, .navigation button { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-small); line-height: 24px; transition: color 160ms; }
@@ -119,7 +123,6 @@ h2 { font: 400 clamp(35px, 4.1vw, 56px)/1.18 var(--display); letter-spacing: -.0
 .about-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr); gap: 10%; margin-top: 61px; }
 .timeline { position: relative; }
 .timeline-item { display: flex; gap: 28px; position: relative; min-height: 170px; padding-bottom: 40px; scroll-margin-top: 40px; }
-.timeline-item:first-child { min-height: 208px; }
 .timeline-item:last-child { min-height: auto; padding-bottom: 0; }
 .timeline-item:not(:last-child)::after { content: ''; position: absolute; width: 3px; top: 49px; bottom: 10px; left: 20px; background: radial-gradient(circle, #656c53 1.25px, transparent 1.5px) 0 0 / 3px 9px; }
 .timeline-item:nth-child(2)::after { background-size: 3px 15px; opacity: .65; }
@@ -318,6 +321,7 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
   :root { --inset: 30px; }
   .site-header { height: 82px; }
   .wordmark { font-size: 22px; }
+  .wordmark-greeting { left: 0; top: calc(100% + 3px); translate: none; font-size: var(--text-caption); }
   .navigation { gap: 19px; }
   .navigation a, .navigation button { font-size: var(--text-small); }
   .hero { min-height: 610px; padding-top: 75px; }
@@ -344,7 +348,6 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
   .section-margin-note { font-size: var(--text-small); white-space: normal; max-width: 125px; text-align: right; line-height: 1.6; padding-top: 28px; }
   .about-layout { grid-template-columns: 1fr; gap: 0; margin-top: 46px; }
   .timeline-item { gap: 24px; min-height: 154px; }
-  .timeline-item:first-child { min-height: 195px; }
   .timeline-title { margin-bottom: 16px; }
   .timeline-content p { font-size: var(--text-body); }
   .margin-note { display: none; }
@@ -378,6 +381,7 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
 @media (max-width: 520px) {
   :root { --inset: 23px; }
   .site-header { height: 75px; }
+  .wordmark-greeting { left: calc(100% + 14px); top: 50%; translate: 0 -50%; }
   .menu-toggle { display: grid; place-items: center; margin-left: auto; width: 36px; height: 36px; }
   .menu-toggle .icon { width: 23px; height: 23px; }
   .navigation { display: none; position: absolute; top: 74px; left: 0; right: 0; padding: 16px var(--inset) 21px; background: #1b1e17; border-bottom: 1px solid #50583e; box-shadow: 0 10px 20px #0003; }
@@ -414,7 +418,6 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
   .section-margin-note { display: block; font-size: var(--text-small); max-width: none; padding-top: 0; margin-top: 12px; margin-bottom: 0; text-align: left; }
   .about-layout { margin-top: 37px; }
   .timeline-item { gap: 19px; min-height: 165px; }
-  .timeline-item:first-child { min-height: 205px; }
   .timeline-node { width: 35px; height: 35px; }
   .timeline-node .icon { width: 14px; height: 14px; }
   .timeline-item:not(:last-child)::after { left: 16px; top: 43px; bottom: 8px; }
@@ -475,9 +478,7 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
   .replay-button { display: none; }
 }
 
-/* Résumé summaries share the existing timeline and project drawer. */
-.experience-entry { margin-bottom: 26px; }
-.experience-entry .experience-meta { font-size: var(--text-small); margin-bottom: 10px; }
+/* Brief interests and expandable project summaries. */
 .skills-list { margin-top: 32px; max-width: 280px; }
 .skills-list > div + div { margin-top: 20px; }
 .skills-list dt { color: var(--paper); font-size: var(--text-small); margin-bottom: 6px; }

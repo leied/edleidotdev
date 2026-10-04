@@ -6,7 +6,7 @@ import '@fontsource/archivo-black/latin-400.css';
 import '@fontsource/libre-barcode-39-extended/latin-400.css';
 import './style.css';
 import './motion.css';
-import { profile, notes, project, experiences, resumeProjects, otherProjects, skills } from './content';
+import { profile, notes, project, resumeProjects, otherProjects, skills } from './content';
 import type { ProjectLink } from './content';
 import { icon, asterisk } from './icons';
 
@@ -25,7 +25,10 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="site-shell" id="top">
     <header class="site-header">
-      <a class="wordmark" href="#top" aria-label="edlei.dev, back to top">edlei<span class="wordmark-dot">.</span>dev</a>
+      <div class="header-brand">
+        <a class="wordmark" href="#top" aria-label="edlei.dev, back to top">edlei<span class="wordmark-dot">.</span>dev</a>
+        <span class="wordmark-greeting" aria-hidden="true"></span>
+      </div>
       <span class="header-note">A LITTLE CORNER OF THE INTERNET</span>
       <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="navigation" aria-expanded="false">${icon('menu')}</button>
       <nav class="navigation" id="navigation" aria-label="Main navigation">
@@ -60,7 +63,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <div class="hero-prose">
             <p>I’m a ${note('sophomore', 'sophomore')} at the University of Washington who…</p>
             <ul>
-              <li><span class="prose-dash">↳</span> ${note('intend', 'intends')} to major in ${note('cs', 'CS')} and is open to collaborating on ${note('research', 'research')};</li>
+              <li><span class="prose-dash">↳</span> ${note('intend', 'intend')} to major in ${note('cs', 'CS')} and is open to collaborating on ${note('research', 'research')};</li>
               <li><span class="prose-dash">↳</span> makes <a href="#projects">things</a> on the side. Maybe you’ll find one useful;</li>
               <li><span class="prose-dash">↳</span> <a href="#about-me-extra">reads</a> a lot during the day and hangs out online at night.</li>
             </ul>
@@ -78,17 +81,17 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <ol class="timeline">
             <li class="timeline-item" id="academics">
               <span class="timeline-node" aria-hidden="true">${icon('book')}</span>
-              <div class="timeline-content"><div class="timeline-title"><h3>Academics</h3>${anchor('academics', 'Academics')}<span class="item-status">IN PROGRESS</span></div>
-                <p class="timeline-primary">University of Washington</p><p>Intending to study computer science, with a focus on cybersecurity and usable privacy. Learning through coursework, independent study, and capture-the-flag challenges.</p><span class="small-label">COMPUTER SCIENCE · SECURITY · RESEARCH</span>
+              <div class="timeline-content"><div class="timeline-title"><h3>What I’m learning</h3>${anchor('academics', 'What I’m learning')}</div>
+                <p>Computer science, cybersecurity, and how to make technology easier to use safely.</p>
               </div>
             </li>
             <li class="timeline-item" id="experiences">
               <span class="timeline-node" aria-hidden="true">${icon('code')}</span>
-              <div class="timeline-content"><div class="timeline-title"><h3>Experiences</h3>${anchor('experiences', 'Experiences')}</div>${experiences.map((experience) => `<div class="experience-entry"><p class="timeline-primary">${escape(experience.role)}</p><p class="experience-meta">${escape(experience.organization)}<br/>${escape(experience.period)}</p><p>${escape(experience.description)}</p></div>`).join('')}</div>
+              <div class="timeline-content"><div class="timeline-title"><h3>What I’m making</h3>${anchor('experiences', 'What I’m making')}</div><p>Small web tools, research experiments, and things that make everyday tasks a little easier.</p></div>
             </li>
             <li class="timeline-item" id="about-me-extra">
               <span class="timeline-node" aria-hidden="true">${asterisk()}</span>
-              <div class="timeline-content"><div class="timeline-title"><h3>The extra bits</h3>${anchor('about-me-extra', 'The extra bits')}</div><p>Outside of code, I volunteer in audiovisual production, working with a team on live video, cameras, and projection. I’ve also co-led student technology and esports teams and led a tutoring team.</p><span class="small-label">BUILDING THINGS · HELPING PEOPLE LEARN</span></div>
+              <div class="timeline-content"><div class="timeline-title"><h3>The extra bits</h3>${anchor('about-me-extra', 'The extra bits')}</div><p>Usually reading, tinkering, or helping out behind the scenes.</p></div>
             </li>
           </ol>
           <aside class="margin-note"><span class="margin-note-index">CURRENTLY CURIOUS ABOUT</span><p>People, privacy,<br/>and how we use<br/><em>technology.</em></p><svg viewBox="0 0 230 35" fill="none" aria-hidden="true"><path d="M3 16c51-9 117-12 213-8M15 27c45-10 101-13 158-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="margin-note-foot">…and a fair bit of AI / LLMs.</span><dl class="skills-list">${skills.map((skill) => `<div><dt>${escape(skill.label)}</dt><dd>${escape(skill.description)}</dd></div>`).join('')}</dl>${asterisk('margin-star')}</aside>
@@ -144,6 +147,34 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div class="tooltip" id="note-time" role="tooltip" hidden><strong>Pacific Time</strong><span>America/Los_Angeles</span><span class="unix-line">Unix time <code data-unix></code></span></div>
   <dialog class="notice-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description"><button class="dialog-close" type="button" aria-label="Close dialog">${icon('close')}</button><span class="eyebrow">STILL UNDER CONSTRUCTION</span><h2 id="dialog-title"></h2><p id="dialog-description"></p><button class="dialog-done" type="button">Back to exploring ${icon('arrow')}</button></dialog>
 `;
+
+// Pick one greeting per visit with the pointer or keyboard; keep the logo still.
+const greetings = ["What's up?", 'Hey there!', ';D', "How's your day?", 'Hello hello!'] as const;
+const headerBrand = document.querySelector<HTMLElement>('.header-brand')!;
+const headerWordmark = headerBrand.querySelector<HTMLAnchorElement>('.wordmark')!;
+const wordmarkGreeting = headerBrand.querySelector<HTMLElement>('.wordmark-greeting')!;
+let wordmarkHovered = false;
+let wordmarkFocused = false;
+function updateGreeting() {
+  const visible = wordmarkHovered || wordmarkFocused;
+  // Keep the same greeting when a quick re-entry reverses its exit transition.
+  if (visible && !headerBrand.classList.contains('is-greeting') && getComputedStyle(wordmarkGreeting).visibility === 'hidden') {
+    wordmarkGreeting.textContent = greetings[Math.floor(Math.random() * greetings.length)];
+  }
+  headerBrand.classList.toggle('is-greeting', visible);
+}
+headerWordmark.addEventListener('pointerenter', (event) => {
+  if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+    wordmarkHovered = true;
+    updateGreeting();
+  }
+});
+headerWordmark.addEventListener('pointerleave', () => { wordmarkHovered = false; updateGreeting(); });
+headerWordmark.addEventListener('focus', () => {
+  wordmarkFocused = headerWordmark.matches(':focus-visible');
+  updateGreeting();
+});
+headerWordmark.addEventListener('blur', () => { wordmarkFocused = false; updateGreeting(); });
 
 // Live Pacific time, including daylight saving time and a real Unix timestamp.
 const clock = document.querySelector<HTMLTimeElement>('[data-clock]')!;

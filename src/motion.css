@@ -4,10 +4,16 @@
 @media (prefers-reduced-motion: no-preference) {
   :root { --ease-hover: cubic-bezier(.2, .7, .2, 1); }
 
-  .wordmark, .wordmark-dot, .name-period, .replay-glyph {
+  .name-period, .replay-glyph {
     display: inline-block;
     transition: transform 320ms var(--ease-hover), color 180ms;
   }
+  .wordmark-greeting {
+    transition: opacity 260ms var(--ease-hover), transform 260ms var(--ease-hover), visibility 0s linear 260ms;
+  }
+  .header-note { transition: visibility 0s linear 260ms; }
+  .header-brand.is-greeting .wordmark-greeting,
+  .header-brand.is-greeting + .header-note { transition-delay: 0s; }
 
   .navigation :is(a, button), .footer-links :is(a, button), .project-links :is(a, button) {
     position: relative;
@@ -45,7 +51,6 @@
   }
   .portrait-frame { transition: border-color 250ms, background-color 250ms; }
   .scribble-arrow { transition: transform 400ms var(--ease-hover); }
-  .barcode { transition: transform 450ms var(--ease-hover); }
 
   .timeline-node, .timeline-node > svg, .timeline-content, .section-anchor,
   .project-icon, .project-title {
@@ -91,8 +96,6 @@
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .wordmark:hover { transform: translateY(-2px); }
-  .wordmark:hover .wordmark-dot { transform: translate(2px, -4px) rotate(-12deg); }
   h1:hover .name-period { transform: translateY(-5px) rotate(-9deg); }
 
   .navigation :is(a, button):hover::after,
@@ -108,7 +111,6 @@
   .portrait-placeholder:hover { transform: rotate(3deg) translateY(-5px); opacity: .92; }
   .portrait-placeholder:hover .portrait-frame { border-color: #73805b; }
   .portrait-placeholder:hover .scribble-arrow { transform: rotate(1deg) translate(-4px, -3px); }
-  .barcode-rule:hover .barcode { transform: translateX(-18px); }
 
   .section-anchor:hover { transform: translateY(-2px) rotate(-8deg); }
   .timeline-item:hover .timeline-node {

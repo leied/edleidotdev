@@ -21,9 +21,9 @@ export const profile = {
 };
 
 export const notes = {
-  sophomore: 'UW places students by credits. I have 59 credits on my transcript, but this is my first year at UW.',
-  intend: 'I entered UW through the Robinson Center’s UW Academy program after 10th grade. I couldn’t request a major when I applied and can’t apply for one yet. I intend to study CS at the Allen School.',
-  cs: 'Computer Science at the Paul G. Allen School, University of Washington.',
+  sophomore: 'Class standing is based on credits.',
+  intend: 'I’m planning to study computer science; I haven’t declared a major yet.',
+  cs: 'Computer science.',
   research: 'I’m interested in usable security & privacy, human–computer interaction, and AI / large language models.',
 };
 
@@ -37,22 +37,6 @@ export const project = {
   ],
 };
 
-
-// Public summaries deliberately omit private contact details and personal schedules.
-export const experiences = [
-  {
-    role: 'Research Lab Assistant',
-    organization: 'Usable Security & Privacy Lab · Western Washington University',
-    period: '2025–2026',
-    description: 'Supported a research publication through participant interviews following IRB procedures, qualitative transcript coding, and data collection. Built internal Python tools to bring collected data together for analysis.',
-  },
-  {
-    role: 'Website Maintainer',
-    organization: 'WoodinvilleNow.org',
-    period: '2024–present',
-    description: 'Migrated the website to a new hosting provider while preserving data and minimizing downtime. Improved caching and search engine optimization, strengthened firewall rules, and hardened the site.',
-  },
-];
 
 export const resumeProjects = [
   {
@@ -148,7 +132,7 @@ export const otherProjects = [
 ];
 
 export const skills = [
-  { label: 'Languages & web', description: 'Python, TypeScript, JavaScript, Bash, Java, React, HTML & CSS' },
-  { label: 'Systems & security', description: 'Linux, Git, QEMU/KVM, Cloudflare, Burp Suite, networking & server maintenance' },
-  { label: 'Research & design', description: 'Qualitative interviews, UX research, Figma & interface design' },
+  { label: 'Code', description: 'Python, TypeScript & the web' },
+  { label: 'Systems', description: 'Linux, networking & security' },
+  { label: 'Design', description: 'Usable privacy & thoughtful interfaces' },
 ];
