@@ -484,11 +484,8 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
 .skills-list dt { color: var(--paper); font-size: var(--text-small); margin-bottom: 6px; }
 .skills-list dd { margin: 0; color: var(--muted); font-size: var(--text-small); line-height: 1.7; }
 .resume-project { margin-bottom: 14px; }
-.resume-project summary { list-style: none; cursor: pointer; }
-.resume-project summary::-webkit-details-marker { display: none; }
-.resume-project summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+.project-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
 .resume-project .project-title { min-width: 0; overflow-wrap: anywhere; }
-.resume-project[open] .project-plus { transform: rotate(45deg); }
 .resume-project-body { padding: 0 24px 24px; color: var(--muted); line-height: 1.8; }
 .resume-project-body p { margin-bottom: 16px; }
 .resume-project-body .small-label { display: block; }

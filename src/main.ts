@@ -110,15 +110,15 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
               <span class="cup-caption">a few things I’ve been pouring myself into</span>
             </div>
             <div class="workbench-topline"><span class="small-label">THE SIDE-PROJECT DRAWER</span><button class="replay-button" type="button" data-replay aria-label="Replay the cup animation"><span class="replay-glyph" aria-hidden="true">↻</span><span>shake things up</span></button></div>
-            ${resumeProjects.map((item) => `<details class="project-card resume-project" id="project-${item.id}">
-              <summary class="project-toggle"><span class="project-icon">${icon(item.icon)}</span><span class="project-title"><strong>${escape(item.name)}</strong><span>${escape(item.headline)}</span></span>${icon('plus', 'project-plus')}</summary>
-              <div class="resume-project-body">
+            ${resumeProjects.map((item) => `<article class="project-card resume-project" id="project-${item.id}" data-project>
+              <button class="project-toggle" type="button" aria-expanded="false" aria-controls="${item.id}-detail"><span class="project-icon">${icon(item.icon)}</span><span class="project-title"><strong>${escape(item.name)}</strong><span>${escape(item.headline)}</span></span>${icon('plus', 'project-plus')}</button>
+              <div class="project-detail" id="${item.id}-detail" inert aria-hidden="true"><div class="project-detail-inner"><div class="resume-project-body">
                 <div class="project-illustration"><img src="${escape(item.illustration.src)}" alt="${escape(item.illustration.alt)}" width="480" height="240" loading="lazy" decoding="async"/></div>
                 <p>${escape(item.description)}</p><p>${escape(item.detail)}</p>
                 <div class="resume-project-footer"><span class="small-label">${escape(item.tags)}</span>${projectLinks(item.links, item.name)}</div>
                 ${item.privateSource ? '<span class="project-access-note">Source code is private.</span>' : ''}
-              </div>
-            </details>`).join('')}
+              </div></div></div>
+            </article>`).join('')}
             <article class="project-card" id="project-embedidraw" data-project>
               <button class="project-toggle" type="button" aria-expanded="false" aria-controls="embedidraw-detail"><span class="project-icon">${icon('pencil')}</span><span class="project-title"><strong>${project.name}</strong><span>Excalidraw, wherever you need it.</span></span>${icon('plus', 'project-plus')}</button>
               <div class="project-detail" id="embedidraw-detail" inert aria-hidden="true"><div class="project-detail-inner">
@@ -242,32 +242,36 @@ document.addEventListener('pointerdown', (event) => { if (activeNote && !activeN
 window.addEventListener('resize', positionNote);
 window.addEventListener('scroll', positionNote, { passive: true });
 
-// The project previews on hover; a click pins it open until clicked again.
-const projectCard = document.querySelector<HTMLElement>('[data-project]')!;
-const projectButton = projectCard.querySelector<HTMLButtonElement>('.project-toggle')!;
-const projectDetail = projectCard.querySelector<HTMLElement>('.project-detail')!;
-let projectPinned = false;
-let projectHovered = false;
-function setProjectOpen(open: boolean) {
-  projectCard.classList.toggle('is-open', open);
-  projectCard.classList.toggle('is-pinned', projectPinned);
-  projectButton.setAttribute('aria-expanded', String(open));
-  projectDetail.inert = !open;
-  projectDetail.setAttribute('aria-hidden', String(!open));
-}
-projectCard.addEventListener('pointerenter', (event) => {
-  if (event.pointerType === 'mouse') { projectHovered = true; setProjectOpen(true); }
+// Each project previews on hover; a click pins it open until clicked again.
+document.querySelectorAll<HTMLElement>('[data-project]').forEach((projectCard) => {
+  const projectButton = projectCard.querySelector<HTMLButtonElement>('.project-toggle')!;
+  const projectDetail = projectCard.querySelector<HTMLElement>('.project-detail')!;
+  let projectPinned = false;
+  let projectHovered = false;
+  function setProjectOpen(open: boolean) {
+    projectCard.classList.toggle('is-open', open);
+    projectCard.classList.toggle('is-pinned', projectPinned);
+    projectButton.setAttribute('aria-expanded', String(open));
+    projectDetail.inert = !open;
+    projectDetail.setAttribute('aria-hidden', String(!open));
+  }
+  projectCard.addEventListener('pointerenter', (event) => {
+    if (event.pointerType === 'mouse') { projectHovered = true; setProjectOpen(true); }
+  });
+  projectCard.addEventListener('pointerleave', () => {
+    projectHovered = false;
+    if (!projectPinned && !projectCard.contains(document.activeElement)) setProjectOpen(false);
+  });
+  projectButton.addEventListener('click', () => { projectPinned = !projectPinned; setProjectOpen(projectPinned); });
+  projectCard.addEventListener('focusin', () => setProjectOpen(true));
+  projectCard.addEventListener('focusout', () => {
+    queueMicrotask(() => { if (!projectPinned && !projectHovered && !projectCard.contains(document.activeElement)) setProjectOpen(false); });
+  });
+  projectCard.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') { projectPinned = false; projectButton.focus(); setProjectOpen(false); }
+  });
+  if (window.location.hash === `#${projectCard.id}`) { projectPinned = true; setProjectOpen(true); }
 });
-projectCard.addEventListener('pointerleave', () => {
-  projectHovered = false;
-  if (!projectPinned && !projectCard.contains(document.activeElement)) setProjectOpen(false);
-});
-projectButton.addEventListener('click', () => { projectPinned = !projectPinned; setProjectOpen(projectPinned); });
-projectCard.addEventListener('focusin', () => setProjectOpen(true));
-projectCard.addEventListener('focusout', () => {
-  queueMicrotask(() => { if (!projectPinned && !projectHovered && !projectCard.contains(document.activeElement)) setProjectOpen(false); });
-});
-if (window.location.hash === '#project-embedidraw') { projectPinned = true; setProjectOpen(true); }
 
 // The cup settles in place after playing and stays visible between replays.
 const cupStage = document.querySelector<HTMLElement>('[data-cup-stage]')!;
@@ -339,6 +343,5 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     closeNote();
     if (navigation.classList.contains('is-open')) { closeMenu(); menuButton.focus(); }
-    if (projectCard.contains(document.activeElement)) { projectPinned = false; projectButton.focus(); setProjectOpen(false); }
   }
 });
