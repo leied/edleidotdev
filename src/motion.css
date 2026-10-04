@@ -4,7 +4,7 @@
 @media (prefers-reduced-motion: no-preference) {
   :root { --ease-hover: cubic-bezier(.2, .7, .2, 1); }
 
-  .wordmark, .wordmark-dot, .name-period, .tiny-cross, .replay-glyph {
+  .wordmark, .wordmark-dot, .name-period, .replay-glyph {
     display: inline-block;
     transition: transform 320ms var(--ease-hover), color 180ms;
   }
@@ -43,12 +43,12 @@
   .portrait-placeholder {
     transition: transform 450ms var(--ease-hover), opacity 350ms;
   }
-  .portrait-frame, .future-project { transition: border-color 250ms, background-color 250ms; }
+  .portrait-frame { transition: border-color 250ms, background-color 250ms; }
   .scribble-arrow { transition: transform 400ms var(--ease-hover); }
   .barcode { transition: transform 450ms var(--ease-hover); }
 
   .timeline-node, .timeline-node > svg, .timeline-content, .section-anchor,
-  .proud-link, .proud-icon, .project-icon, .project-title, .future-icon {
+  .project-icon, .project-title {
     transition: transform 280ms var(--ease-hover), color 220ms,
       border-color 220ms, background-color 220ms, box-shadow 280ms;
   }
@@ -109,7 +109,6 @@
   .portrait-placeholder:hover .portrait-frame { border-color: #73805b; }
   .portrait-placeholder:hover .scribble-arrow { transform: rotate(1deg) translate(-4px, -3px); }
   .barcode-rule:hover .barcode { transform: translateX(-18px); }
-  .barcode-rule:hover .tiny-cross { transform: rotate(90deg); }
 
   .section-anchor:hover { transform: translateY(-2px) rotate(-8deg); }
   .timeline-item:hover .timeline-node {
@@ -126,15 +125,11 @@
   .margin-note:hover .margin-star { transform: rotate(105deg); color: var(--accent); }
 
   .vibe-word:hover path { stroke-dasharray: 100; animation: underline-draw 400ms var(--ease-hover) both; }
-  .proud-link:hover { transform: translateX(4px); }
-  .proud-link:hover .proud-icon { transform: rotate(-12deg); background: #cedc970c; border-color: var(--accent); }
   .project-card:hover { box-shadow: 0 8px 24px #0002; }
   .project-card:hover .project-icon { transform: rotate(-9deg) scale(1.05); background: #cedc970c; }
   .project-card:hover .project-title { transform: translateX(3px); }
   .drawing-preview:hover .sketch-paper { transform: rotate(-2deg) translateY(-3px); }
   .drawing-preview:hover .sketch-browser { transform: rotate(1deg) translateY(-2px); }
-  .future-project:hover { border-color: #677452; background: #cedc9705; }
-  .future-project:hover .future-icon { transform: rotate(90deg); border-color: #84956a; color: var(--accent); }
   .replay-button:not(:disabled):hover .replay-glyph { transform: rotate(-65deg); }
 
   .hello-link:hover { transform: translateY(-2px); border-color: var(--accent); }

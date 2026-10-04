@@ -6,16 +6,20 @@ import '@fontsource/archivo-black/latin-400.css';
 import '@fontsource/libre-barcode-39-extended/latin-400.css';
 import './style.css';
 import './motion.css';
-import { profile, notes, project } from './content';
+import { profile, notes, project, experiences, resumeProjects, otherProjects, skills } from './content';
+import type { ProjectLink } from './content';
 import { icon, asterisk } from './icons';
 
 const escape = (value: string) => value.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 const note = (key: string, label: string) => `<button type="button" class="text-note" data-note="${key}" aria-describedby="note-${key}">${label}</button>`;
 const anchor = (id: string, label: string) => `<a class="section-anchor" href="#${id}" aria-label="Link to ${label}">#</a>`;
+const projectLinks = (links: readonly ProjectLink[], name: string) => links.length
+  ? `<span class="project-links">${links.map((link) => `<a href="${escape(link.href)}" aria-label="${escape(`${link.label} for ${name}`)}">${escape(link.label)} ${icon('arrow')}</a>`).join('')}</span>`
+  : '';
 const personalLink = (key: keyof typeof profile.links, label: string, className = '') => profile.links[key]
-  ? `<a class="${className}" href="${escape(profile.links[key])}">${label}${icon('arrow')}</a>`
+  ? `<a class="${className}" href="${escape(profile.links[key])}"${key === 'contact' ? ' aria-describedby="academic-contact-note"' : ''}>${label}${icon('arrow')}</a>`
   : `<button class="${className}" type="button" data-dialog="${key}">${label}${icon('arrow')}</button>`;
-const barcode = (bottom = false) => `<div class="barcode-rule ${bottom ? 'barcode-rule--bottom' : ''}" aria-label="Construction in progress"><div class="barcode" aria-hidden="true">${'*Construction in progress...*'.repeat(8)}</div><span class="barcode-label">${bottom ? 'STILL A WORK IN PROGRESS' : 'CONSTRUCTION IN PROGRESS'}<span class="tiny-cross">+</span></span></div>`;
+const barcode = (bottom = false) => `<div class="barcode-rule ${bottom ? 'barcode-rule--bottom' : ''}" role="separator" aria-label="Construction in progress..."><div class="barcode" aria-hidden="true">${'*Construction in progress...*'.repeat(24)}</div></div>`;
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <a class="skip-link" href="#main">Skip to content</a>
@@ -38,7 +42,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         ${profile.portrait ? `<div class="hero-photo" aria-hidden="true"><img src="${escape(profile.portrait)}" alt=""/><div class="hero-scrim"></div></div>` : `
         <div class="portrait-placeholder" aria-label="Placeholder for a future personal photograph">
           <div class="portrait-frame"><span class="frame-cross frame-cross--tl">+</span><span class="frame-cross frame-cross--tr">+</span><span class="frame-cross frame-cross--bl">+</span><span class="frame-cross frame-cross--br">+</span>
-            <span class="portrait-coordinate">47°36′ N / 122°20′ W</span>
+            <span class="portrait-coordinate">CURIOUS BY DEFAULT</span>
             <svg class="portrait-sketch" viewBox="0 0 260 280" fill="none" aria-hidden="true"><path d="M41 221c17-35 48-39 79-41m18 0c37 4 59 15 78 41M96 130c-6-11-6-25-3-37 3-23 16-34 37-33 30 1 38 20 35 46-1 25-10 49-31 52-15 2-29-10-34-27m-4-31c13 1 20-12 22-19 6 13 29 19 47 14m-42 64-1 20m16-21 2 21m-19 3 10 17 12-17M60 243l142-2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="3 5"/></svg>
             <span class="portrait-caption">a photo of me,<br/><em>eventually.</em></span>
             <span class="portrait-index">FIG. 01 &nbsp; / &nbsp; PLACEHOLDER</span>
@@ -75,52 +79,63 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
             <li class="timeline-item" id="academics">
               <span class="timeline-node" aria-hidden="true">${icon('book')}</span>
               <div class="timeline-content"><div class="timeline-title"><h3>Academics</h3>${anchor('academics', 'Academics')}<span class="item-status">IN PROGRESS</span></div>
-                <p class="timeline-primary">University of Washington</p><p>Sophomore by credits. First year by experience.<br/>Finding my way toward computer science.</p><span class="small-label">UW ACADEMY &nbsp; / &nbsp; SEATTLE, WA</span>
+                <p class="timeline-primary">University of Washington</p><p>Intending to study computer science, with a focus on cybersecurity and usable privacy. Learning through coursework, independent study, and capture-the-flag challenges.</p><span class="small-label">COMPUTER SCIENCE · SECURITY · RESEARCH</span>
               </div>
             </li>
             <li class="timeline-item" id="experiences">
               <span class="timeline-node" aria-hidden="true">${icon('code')}</span>
-              <div class="timeline-content"><div class="timeline-title"><h3>Experiences</h3>${anchor('experiences', 'Experiences')}<span class="item-status">IN PROGRESS</span></div><p>A few things to write up.<br/>I’ll fill this part in as I go.</p></div>
+              <div class="timeline-content"><div class="timeline-title"><h3>Experiences</h3>${anchor('experiences', 'Experiences')}</div>${experiences.map((experience) => `<div class="experience-entry"><p class="timeline-primary">${escape(experience.role)}</p><p class="experience-meta">${escape(experience.organization)}<br/>${escape(experience.period)}</p><p>${escape(experience.description)}</p></div>`).join('')}</div>
             </li>
             <li class="timeline-item" id="about-me-extra">
               <span class="timeline-node" aria-hidden="true">${asterisk()}</span>
-              <div class="timeline-content"><div class="timeline-title"><h3>The extra bits</h3>${anchor('about-me-extra', 'The extra bits')}</div><p>A lot of reading. A little too much time online.<br/>And usually another side project.</p><span class="small-label">MORE TO COME</span></div>
+              <div class="timeline-content"><div class="timeline-title"><h3>The extra bits</h3>${anchor('about-me-extra', 'The extra bits')}</div><p>Outside of code, I volunteer in audiovisual production, working with a team on live video, cameras, and projection. I’ve also co-led student technology and esports teams and led a tutoring team.</p><span class="small-label">BUILDING THINGS · HELPING PEOPLE LEARN</span></div>
             </li>
           </ol>
-          <aside class="margin-note"><span class="margin-note-index">CURRENTLY CURIOUS ABOUT</span><p>People, privacy,<br/>and how we use<br/><em>technology.</em></p><svg viewBox="0 0 230 35" fill="none" aria-hidden="true"><path d="M3 16c51-9 117-12 213-8M15 27c45-10 101-13 158-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="margin-note-foot">…and a fair bit of AI / LLMs.</span>${asterisk('margin-star')}</aside>
+          <aside class="margin-note"><span class="margin-note-index">CURRENTLY CURIOUS ABOUT</span><p>People, privacy,<br/>and how we use<br/><em>technology.</em></p><svg viewBox="0 0 230 35" fill="none" aria-hidden="true"><path d="M3 16c51-9 117-12 213-8M15 27c45-10 101-13 158-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="margin-note-foot">…and a fair bit of AI / LLMs.</span><dl class="skills-list">${skills.map((skill) => `<div><dt>${escape(skill.label)}</dt><dd>${escape(skill.description)}</dd></div>`).join('')}</dl>${asterisk('margin-star')}</aside>
         </div>
       </section>
 
       <section class="projects section-pad" id="projects" aria-labelledby="projects-title">
         <div class="section-heading"><div><p class="eyebrow"><span>02</span> MADE OUT OF CURIOSITY</p><h2 id="projects-title">My projects${anchor('projects', 'My projects')}</h2></div><span class="section-margin-note">some useful. some just because.</span></div>
         <div class="projects-layout">
-          <div class="projects-copy"><p class="project-lede">When I have free time,<br/>I just <span class="vibe-word">(vibe)<svg viewBox="0 0 90 15" fill="none" aria-hidden="true"><path d="M2 9 86 3M9 14l67-6" stroke="currentColor" stroke-width="2"/></svg></span> code.</p><p>Why? I don’t know. It’s just something<br class="desktop-break"/> I really enjoy doing.</p><p>Here’s a small collection of things I’ve<br class="desktop-break"/> made, and things still taking shape.</p><div class="interaction-note">${icon('arrow')} <span>Hover to take a peek.<br/>Click to keep it open.</span></div>
-            <div class="proud"><span class="small-label">ONE I’M PRETTY PROUD OF</span><a class="proud-link" href="#project-embedidraw" data-open-project><span class="proud-icon">${icon('pencil')}</span><span><strong>${project.name}</strong><small>A little tool for sharing big ideas.</small></span>${icon('arrow')}</a></div>
+          <div class="projects-copy"><p class="project-lede">When I have free time,<br/>I just <span class="vibe-word">(vibe)<svg viewBox="0 0 90 15" fill="none" aria-hidden="true"><path d="M2 9 86 3M9 14l67-6" stroke="currentColor" stroke-width="2"/></svg></span> code.</p><p>Why? I don’t know. It’s just something<br class="desktop-break"/> I really enjoy doing.</p><p>Here’s a small collection of things I’ve<br class="desktop-break"/> made, and things still taking shape.</p><div class="interaction-note">${icon('arrow')} <span>Open a project<br/>to read a little more.</span></div>
           </div>
           <div class="project-workbench">
             <div class="cup-stage" data-cup-stage aria-hidden="true">
-              <div class="cup-object"><div class="cup-lid"></div><div class="cup-vessel"><span class="cup-print">bits &<br/>pieces<span>EST. WHENEVER</span></span><div class="cup-smile">:)</div></div></div>
+              <div class="cup-object"><div class="cup-assembly"><div class="cup-lid"></div><div class="cup-vessel"><span class="cup-print">bits &<br/>pieces<span>EST. WHENEVER</span></span><div class="cup-smile">:)</div></div></div></div>
               <span class="falling-bit bit-one">${icon('code')}</span><span class="falling-bit bit-two">${asterisk()}</span><span class="falling-bit bit-three">${icon('pencil')}</span><span class="falling-bit bit-four">{ }</span><span class="falling-bit bit-five">${icon('book')}</span><span class="falling-bit bit-six">↗</span>
               <span class="cup-caption">a few things I’ve been pouring myself into</span>
             </div>
             <div class="workbench-topline"><span class="small-label">THE SIDE-PROJECT DRAWER</span><button class="replay-button" type="button" data-replay aria-label="Replay the cup animation"><span class="replay-glyph" aria-hidden="true">↻</span><span>shake things up</span></button></div>
+            ${resumeProjects.map((item) => `<details class="project-card resume-project" id="project-${item.id}">
+              <summary class="project-toggle"><span class="project-icon">${icon(item.icon)}</span><span class="project-title"><strong>${escape(item.name)}</strong><span>${escape(item.headline)}</span></span>${icon('plus', 'project-plus')}</summary>
+              <div class="resume-project-body">
+                <div class="project-illustration"><img src="${escape(item.illustration.src)}" alt="${escape(item.illustration.alt)}" width="480" height="240" loading="lazy" decoding="async"/></div>
+                <p>${escape(item.description)}</p><p>${escape(item.detail)}</p>
+                <div class="resume-project-footer"><span class="small-label">${escape(item.tags)}</span>${projectLinks(item.links, item.name)}</div>
+                ${item.privateSource ? '<span class="project-access-note">Source code is private.</span>' : ''}
+              </div>
+            </details>`).join('')}
             <article class="project-card" id="project-embedidraw" data-project>
               <button class="project-toggle" type="button" aria-expanded="false" aria-controls="embedidraw-detail"><span class="project-icon">${icon('pencil')}</span><span class="project-title"><strong>${project.name}</strong><span>Excalidraw, wherever you need it.</span></span>${icon('plus', 'project-plus')}</button>
               <div class="project-detail" id="embedidraw-detail" inert aria-hidden="true"><div class="project-detail-inner">
                 <div class="drawing-preview" aria-label="Illustration of a sketch being embedded in a webpage"><div class="sketch-paper"><svg viewBox="0 0 150 96" fill="none" aria-hidden="true"><rect x="11" y="22" width="46" height="42" rx="3" stroke="currentColor" stroke-width="1.5" transform="rotate(-4 11 22)"/><path d="m25 51 9-14 11 16M62 41c15-13 25-8 32 0m-5-9 6 9-10 4" stroke="currentColor" stroke-width="1.5"/><circle cx="119" cy="40" r="20" stroke="currentColor" stroke-width="1.5"/><path d="m110 40 7 7 12-13" stroke="currentColor" stroke-width="1.5"/></svg><span>your next big idea</span></div><span class="embed-arrow">↗</span><div class="sketch-browser"><div><i></i><i></i><i></i></div><span>&lt; your website /&gt;</span><svg viewBox="0 0 100 45" aria-hidden="true"><path d="M8 27h23l12-17 17 24 13-16 19 9" stroke="currentColor" fill="none"/></svg></div></div>
-                <p>${project.description}</p><div class="project-detail-footer"><span class="small-label">A SMALL, USEFUL TOOL</span><span class="project-links">${Object.entries(project.links).map(([key, href]) => href ? `<a href="${escape(href)}">${key === 'github' ? 'GitHub' : key === 'website' ? 'Website' : 'Demo'} ${icon('arrow')}</a>` : `<button type="button" data-dialog="project-${key}">${key === 'github' ? 'GitHub' : key === 'website' ? 'Website' : 'Demo'} ${icon('arrow')}</button>`).join('')}</span></div>
+                <p>${project.description}</p><div class="project-detail-footer"><span class="small-label">A SMALL, USEFUL TOOL</span>${projectLinks(project.links, project.name)}</div>
               </div></div>
             </article>
-            <div class="future-project"><span class="future-icon">${icon('plus')}</span><div><p>Something’s always in the works.</p><span>The next project will land here.</span></div><span class="item-status">TO BE CONTINUED</span></div>
             <p class="drawer-footnote"><span>←</span> Small experiments, loose ends, happy accidents.</p>
           </div>
+          <section class="other-projects" id="other-projects" aria-labelledby="other-projects-title">
+            <div class="other-projects-heading"><h3 id="other-projects-title">My other projects${anchor('other-projects', 'My other projects')}</h3></div>
+            <ul class="other-projects-list">${otherProjects.map((item) => `<li><strong>${escape(item.name)}</strong><p>${escape(item.description)}</p><div class="other-projects-links">${projectLinks(item.links, item.name)}${item.privateSource ? '<span class="project-access-note">Source code is private.</span>' : ''}</div></li>`).join('')}</ul>
+          </section>
         </div>
       </section>
       ${barcode(true)}
     </main>
 
     <footer class="site-footer section-pad" id="contact">
-      <div class="footer-top"><div><p class="eyebrow"><span>03</span> THAT’S ME, FOR NOW</p><h2>Let’s cross paths<span class="footer-period">.</span>${anchor('contact', 'Contact')}</h2><p>Interesting ideas, research, or just a hello.</p></div>${personalLink('contact', 'Say hello', 'hello-link')}</div>
+      <div class="footer-top"><div><p class="eyebrow"><span>03</span> THAT’S ME, FOR NOW</p><h2>Let’s cross paths<span class="footer-period">.</span>${anchor('contact', 'Contact')}</h2><p>Interesting ideas, research, or just a hello.</p></div><div class="contact-details">${personalLink('contact', escape(profile.email), 'hello-link')}<p class="academic-contact-note" id="academic-contact-note">For academic correspondence, please use my academic email if you already know it.</p></div></div>
       <div class="footer-bottom"><a class="wordmark" href="#top">edward l<span class="wordmark-dot">.</span></a><span class="copyright">© ${new Date().getFullYear()} Edward L &nbsp;·&nbsp; MIT licensed</span><div class="footer-links">${personalLink('github', 'GitHub')}${personalLink('linkinbio', 'Link in bio')}${personalLink('resume', 'Résumé')}</div><a href="#top" class="back-top" aria-label="Back to top">↑</a></div>
       <p class="footer-colophon">Made slowly. Changed often.</p>
     </footer>
@@ -221,14 +236,17 @@ projectCard.addEventListener('focusin', () => setProjectOpen(true));
 projectCard.addEventListener('focusout', () => {
   queueMicrotask(() => { if (!projectPinned && !projectHovered && !projectCard.contains(document.activeElement)) setProjectOpen(false); });
 });
-document.querySelector('[data-open-project]')!.addEventListener('click', () => { projectPinned = true; setProjectOpen(true); });
 if (window.location.hash === '#project-embedidraw') { projectPinned = true; setProjectOpen(true); }
 
-// This is a brief, decorative interlude. All content stays visible and usable.
+// The cup settles in place after playing and stays visible between replays.
 const cupStage = document.querySelector<HTMLElement>('[data-cup-stage]')!;
+const cupObject = cupStage.querySelector<HTMLElement>('.cup-object')!;
 const replayButton = document.querySelector<HTMLButtonElement>('[data-replay]')!;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-let cupTimer: number | undefined;
+function finishCup() {
+  cupStage.classList.remove('is-playing');
+  replayButton.disabled = false;
+}
 function playCup() {
   if (reducedMotion.matches || cupStage.classList.contains('is-playing')) return;
   cupStage.querySelectorAll<HTMLElement>('.falling-bit').forEach((bit, index) => {
@@ -238,15 +256,19 @@ function playCup() {
   });
   replayButton.disabled = true;
   cupStage.classList.add('is-playing');
-  cupTimer = window.setTimeout(() => { cupStage.classList.remove('is-playing'); replayButton.disabled = false; }, 3900);
 }
+// Return to the static cup when its animation finishes.
+cupObject.addEventListener('animationend', (event) => {
+  if (event.target === cupObject && event.animationName === 'cup-visit') finishCup();
+});
 const cupObserver = new IntersectionObserver((entries) => {
   if (entries.some((entry) => entry.isIntersecting)) { playCup(); cupObserver.disconnect(); }
 }, { threshold: 0.6 });
-cupObserver.observe(cupStage);
+if (reducedMotion.matches) finishCup();
+else cupObserver.observe(cupStage);
 replayButton.addEventListener('click', playCup);
 reducedMotion.addEventListener('change', () => {
-  if (reducedMotion.matches) { clearTimeout(cupTimer); cupStage.classList.remove('is-playing'); replayButton.disabled = false; }
+  if (reducedMotion.matches) { cupObserver.disconnect(); finishCup(); }
 });
 
 // Unprovided URLs have an honest, accessible placeholder rather than dead links.
@@ -254,8 +276,6 @@ const notice = document.querySelector<HTMLDialogElement>('.notice-dialog')!;
 const noticeCopy: Record<string, [string, string]> = {
   blog: ['A blank page, for now.', 'This is where the writing will go. There aren’t any posts to share just yet.'],
   resume: ['Résumé in progress.', 'A résumé will be linked here when it’s ready. In the meantime, the About section has a little more about me.'],
-  contact: ['Hello, future friend.', 'Contact details are still being added. Thanks for stopping by this little corner of the internet.'],
-  github: ['GitHub, coming soon.', 'The profile link hasn’t been added yet. You can explore the projects on this page in the meantime.'],
   linkinbio: ['More places, soon.', 'A few more corners of the internet will be linked here. This one is still taking shape.'],
 };
 document.querySelectorAll<HTMLButtonElement>('[data-dialog]').forEach((button) => {
