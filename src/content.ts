@@ -21,7 +21,6 @@ export const profile = {
 };
 
 export const notes = {
-  sophomore: 'Class standing is based on credits.',
   intend: 'I’m planning to study computer science; I haven’t declared a major yet.',
   cs: 'Computer science.',
   research: 'I’m interested in usable security & privacy, human–computer interaction, and AI / large language models.',
