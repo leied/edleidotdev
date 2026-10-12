@@ -61,7 +61,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
             <span>${icon('clock')} ${note('time', '<time data-clock>Pacific Time</time>')}<span class="time-label">LOCAL TIME</span></span>
           </div>
           <div class="hero-prose">
-            <p>I’m a ${note('sophomore', 'sophomore')} at the University of Washington who…</p>
+            <p>I’m an undergraduate at the University of Washington who…</p>
             <ul>
               <li><span class="prose-dash">↳</span> ${note('intend', 'intend')} to major in ${note('cs', 'CS')} and is open to collaborating on ${note('research', 'research')};</li>
               <li><span class="prose-dash">↳</span> makes <a href="#projects">things</a> on the side. Maybe you’ll find one useful;</li>
