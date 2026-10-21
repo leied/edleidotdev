@@ -1,0 +1,110 @@
+/* Slides. Each [data-slide] fills at least one screen and is where the page comes to rest
+   (see smooth-scroll.ts). Every rule depends on .has-slides, which is never set with reduced
+   motion, so that page keeps its original flow. */
+.slide-pager { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Each slide is opaque and stacks over the one before it, so the next can slide over the last.
+     Heading back up, the arriving slide is lifted over the one it's replacing (see below). */
+  .has-slides [data-slide] { position: relative; z-index: 1; background: var(--ground); }
+
+  /* Header and introduction share the first screen; the scroll cue sits at its foot. */
+  .has-slides .hero {
+    display: flex;
+    flex-direction: column;
+    min-height: max(var(--hero-min), calc(100svh - var(--header-h) - var(--shell-offset)));
+  }
+  .has-slides .hero-copy { flex-grow: 1; }
+
+  .has-slides .slide--about { display: flex; flex-direction: column; min-height: 100svh; }
+  .has-slides .slide--about .about { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+  .has-slides .projects { min-height: 100svh; }
+
+  /* The last slide is a closing card: the invitation centered, the colophon at its foot. */
+  .has-slides .slide--contact { display: flex; flex-direction: column; min-height: calc(100svh - var(--shell-offset)); }
+  .has-slides .slide--contact .site-footer { flex-grow: 1; display: flex; flex-direction: column; }
+  .has-slides .slide--contact .footer-top { margin-block: auto; }
+
+  /* On the way out, a slide's contents fall behind the scroll and dim under a veil of the ground
+     color, while the arriving slide passes over it: below it heading down, above it heading up
+     (--recede-sink is 1 or -1). Only while it's leaving, and only when the scroll is driven in step
+     with these frames. */
+  .has-slides.has-smooth-scroll [data-slide]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: var(--ground);
+    opacity: calc(var(--recede, 0) * .65);
+    pointer-events: none;
+  }
+  .has-slides.has-smooth-scroll [data-receding] > * {
+    translate: 0 calc(var(--recede, 0) * var(--recede-sink, 1) * 30svh);
+    will-change: translate;
+  }
+  .has-slides.has-smooth-scroll [data-arriving] { z-index: 2; }
+
+  /* Touch screens keep their own momentum and snap natively. Proximity, so a long area still reads
+     freely wherever the browser can't promise to rest inside it. */
+  @media (pointer: coarse) {
+    html.has-slides { scroll-snap-type: y proximity; scroll-padding-top: 0; }
+    .has-slides :is(.site-header, [data-slide]:not(.hero)) { scroll-snap-align: start; }
+  }
+
+  /* A quiet index of the slides, at the edge of the screen. Numbers match the section eyebrows. */
+  .has-slides .slide-pager {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    position: fixed;
+    z-index: 25;
+    right: 16px;
+    top: 50%;
+    translate: 0 -50%;
+    animation: pager-in 900ms var(--ease-out) 1.6s backwards;
+  }
+  .slide-pager a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0 7px 14px;
+    font: var(--text-caption)/1 var(--mono);
+    letter-spacing: 1px;
+    color: var(--faint);
+    transition: color 220ms;
+  }
+  .slide-pager a::after {
+    content: '';
+    width: 10px;
+    height: 1px;
+    background: currentColor;
+    transition: width 420ms var(--ease-out);
+  }
+  .slide-pager a[aria-current] { color: var(--accent); }
+  .slide-pager a[aria-current]::after { width: 22px; }
+  .slide-pager a:focus-visible { outline-offset: 2px; }
+  /* Labels appear on demand, on a patch of ground so they stay legible over the page. */
+  .slide-pager-label {
+    padding: 4px 6px;
+    background: var(--ground);
+    color: var(--paper);
+    white-space: nowrap;
+    opacity: 0;
+    translate: 6px 0;
+    transition: opacity 200ms, translate 320ms var(--ease-out);
+  }
+  .slide-pager:hover .slide-pager-label, .slide-pager a:focus-visible .slide-pager-label { opacity: 1; translate: 0 0; }
+  @media (hover: hover) {
+    .slide-pager a:hover { color: var(--paper); }
+    .slide-pager a[aria-current]:hover { color: var(--accent); }
+  }
+  /* Narrower screens have less margin to spare: ticks only. Phones go without. */
+  @media (max-width: 1180px) { .slide-pager-index { display: none; } }
+  @media (max-width: 760px) { .has-slides .slide-pager { display: none; } }
+
+  @keyframes pager-in { from { opacity: 0; translate: 12px -50%; } }
+}
+
+@media print {
+  .slide-pager { display: none !important; }
+}

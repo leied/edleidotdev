@@ -1,0 +1,259 @@
+/* Scroll choreography. Every hidden state is the first frame of a paused animation, so the
+   finished page is always the base style: reduced motion, print, and a script that never runs
+   all land on it, and nothing here fights the hover transitions in motion.css. Reveals use the
+   individual translate / rotate / scale properties, which compose with existing transforms. */
+:root {
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-out-expo: cubic-bezier(.16, 1, .3, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* The wheel is eased in script; programmatic scrolls must land at once rather than ease twice. */
+html.has-smooth-scroll { scroll-behavior: auto; }
+.split-word, .split-inner { display: inline-block; }
+.scroll-progress { display: none; }
+[data-scramble] { position: relative; }
+.scramble-layer { position: absolute; inset: 0; padding: inherit; -webkit-text-fill-color: currentColor; pointer-events: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The gate. Kinds reset every variable, since custom properties inherit into nested reveals. */
+  .motion-ready [data-reveal] {
+    --reveal-name: reveal-rise;
+    --reveal-duration: 1100ms;
+    --reveal-ease: var(--ease-out);
+    --reveal-distance: 28px;
+    --reveal-blur: 6px;
+    --reveal-delay: 0ms;
+    --reveal-state: paused;
+    animation: var(--reveal-name) var(--reveal-duration) var(--reveal-ease) var(--reveal-delay) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal].is-inview { --reveal-state: running; }
+  .motion-ready [data-reveal="fade"] { --reveal-name: reveal-fade; --reveal-duration: 1400ms; }
+  .motion-ready [data-reveal="slide"] { --reveal-name: reveal-slide; }
+  .motion-ready [data-reveal="wipe"] { --reveal-name: reveal-wipe; --reveal-duration: 1500ms; --reveal-ease: var(--ease-in-out); }
+  .motion-ready [data-reveal="portrait"] { --reveal-name: reveal-portrait; --reveal-duration: 1700ms; --reveal-ease: var(--ease-out-expo); }
+  .motion-ready [data-reveal="note"] { --reveal-name: reveal-note; --reveal-duration: 1500ms; --reveal-ease: var(--ease-out-expo); }
+  /* These only choreograph their parts. */
+  .motion-ready :is([data-reveal="split"], [data-reveal="eyebrow"], [data-reveal="timeline"], [data-reveal="group"], [data-reveal="row"], [data-reveal="line"]) { --reveal-name: none; }
+
+  /* The header settles as soon as the fonts are in, link by link. */
+  .motion-ready .site-header { --reveal-state: paused; }
+  .motion-ready.is-loaded .site-header { --reveal-state: running; }
+  .motion-ready :is(.site-header > :not(nav), .navigation > *) {
+    animation: reveal-drop 900ms var(--ease-out) calc(100ms + var(--i, 0) * 70ms) backwards var(--reveal-state);
+  }
+
+  /* Headings rise word by word out of their own masks. The clip only has a bottom edge, with
+     room left for descenders, so nothing is trimmed once a word has landed. */
+  .motion-ready [data-reveal="split"] .split-word { padding-bottom: .14em; margin-bottom: -.14em; clip-path: inset(-.5em -.3em 0 -.3em); }
+  .motion-ready [data-reveal="split"] .split-inner {
+    transform-origin: 0 100%;
+    animation: reveal-mask 1200ms var(--ease-out-expo) calc(var(--reveal-delay) + var(--word-index) * 75ms) backwards var(--reveal-state);
+  }
+  /* The accent period drops in after the last word, and the anchor follows quietly. */
+  .motion-ready [data-reveal="split"] :is(.name-period, .footer-period) {
+    display: inline-block;
+    animation: reveal-period 800ms var(--ease-out) calc(var(--reveal-delay) + var(--word-count) * 75ms + 300ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="split"] .section-anchor {
+    animation: reveal-fade 900ms var(--ease-out) calc(var(--reveal-delay) + var(--word-count) * 75ms + 450ms) backwards var(--reveal-state);
+  }
+
+  /* Eyebrows: the index lifts, and the label decodes itself (see reveal.ts). */
+  .motion-ready [data-reveal="eyebrow"] > span:first-child {
+    --reveal-distance: 10px;
+    --reveal-blur: 0px;
+    animation: reveal-rise 900ms var(--ease-out) var(--reveal-delay) backwards var(--reveal-state);
+  }
+  .motion-ready [data-scramble] { -webkit-text-fill-color: transparent; }
+
+  /* The portrait is pinned up in stages: frame, sketch, corners, tape, then the arrow. */
+  .motion-ready [data-reveal="portrait"] .portrait-sketch {
+    animation: reveal-wipe-down 1800ms var(--ease-in-out) calc(var(--reveal-delay) + 500ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="portrait"] .frame-cross {
+    animation: reveal-twirl 800ms var(--ease-spring) calc(var(--reveal-delay) + 650ms + var(--i) * 90ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="portrait"] :is(.portrait-coordinate, .portrait-caption, .portrait-index) {
+    --reveal-distance: 8px;
+    --reveal-blur: 3px;
+    animation: reveal-rise 1000ms var(--ease-out) calc(var(--reveal-delay) + 800ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="portrait"] .portrait-caption { animation-delay: calc(var(--reveal-delay) + 920ms); }
+  .motion-ready [data-reveal="portrait"] .portrait-index { animation-delay: calc(var(--reveal-delay) + 1040ms); }
+  .motion-ready [data-reveal="portrait"] .portrait-frame::before {
+    animation: reveal-tape 700ms var(--ease-out) calc(var(--reveal-delay) + 1150ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="portrait"] .scribble-arrow path {
+    stroke-dasharray: 1 2;
+    animation: reveal-draw 900ms var(--ease-in-out) calc(var(--reveal-delay) + 1300ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="portrait"] .scribble-arrow path + path {
+    animation-duration: 420ms;
+    animation-delay: calc(var(--reveal-delay) + 2150ms);
+  }
+
+  /* Timeline: the node pops, its icon turns upright, and the dotted thread draws downward.
+     A clip, not a scale, so the dots never squash on the way. */
+  .motion-ready [data-reveal="timeline"] .timeline-node {
+    animation: reveal-pop 900ms var(--ease-spring) var(--reveal-delay) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="timeline"] .timeline-node > svg {
+    animation: reveal-turn 1100ms var(--ease-out-expo) calc(var(--reveal-delay) + 120ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="timeline"] .timeline-content {
+    animation: reveal-slide 1100ms var(--ease-out) calc(var(--reveal-delay) + 140ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="timeline"]::after {
+    animation: reveal-wipe-down 1400ms var(--ease-in-out) calc(var(--reveal-delay) + 380ms) backwards var(--reveal-state);
+  }
+
+  /* The margin note is stuck on at a tilt; its underline is then drawn in two strokes. */
+  .motion-ready [data-reveal="note"] .margin-note-index {
+    animation: reveal-fade 900ms var(--ease-out) calc(var(--reveal-delay) + 250ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="note"] .margin-note-underline path {
+    stroke-dasharray: 1 2;
+    animation: reveal-draw 800ms var(--ease-in-out) calc(var(--reveal-delay) + 600ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="note"] .margin-note-underline path + path { animation-delay: calc(var(--reveal-delay) + 850ms); }
+  .motion-ready [data-reveal="note"] .margin-note-foot {
+    animation: reveal-fade 900ms var(--ease-out) calc(var(--reveal-delay) + 950ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="note"] .skills-list > div {
+    --reveal-distance: 12px;
+    --reveal-blur: 3px;
+    animation: reveal-rise 1000ms var(--ease-out) calc(var(--reveal-delay) + 700ms + var(--i) * 110ms) backwards var(--reveal-state);
+  }
+  .motion-ready [data-reveal="note"] .margin-star {
+    animation: reveal-spin 1600ms var(--ease-out-expo) calc(var(--reveal-delay) + 900ms) backwards var(--reveal-state);
+  }
+
+  /* Projects: the (vibe) strike-through is written after the line lands; icons settle in. */
+  .motion-ready [data-reveal] .vibe-word svg {
+    animation: reveal-wipe 650ms var(--ease-in-out) calc(var(--reveal-delay) + 650ms) backwards var(--reveal-state);
+  }
+  .motion-ready .interaction-note[data-reveal] .icon {
+    animation: reveal-turn 1000ms var(--ease-out-expo) calc(var(--reveal-delay) + 200ms) backwards var(--reveal-state);
+  }
+  .motion-ready .project-card[data-reveal] .project-icon {
+    animation: reveal-pop 900ms var(--ease-spring) calc(var(--reveal-delay) + 200ms) backwards var(--reveal-state);
+  }
+  .motion-ready .project-card[data-reveal] .project-plus {
+    animation: reveal-turn 900ms var(--ease-out-expo) calc(var(--reveal-delay) + 320ms) backwards var(--reveal-state);
+  }
+
+  /* Groups and rows hand the motion to their children, a beat apart. */
+  .motion-ready :is([data-reveal="group"], [data-reveal="row"]) > * {
+    --reveal-distance: 14px;
+    --reveal-blur: 4px;
+    animation: reveal-rise 1000ms var(--ease-out) calc(var(--reveal-delay) + var(--i, 0) * 90ms) backwards var(--reveal-state);
+  }
+  .motion-ready :is([data-reveal="group"], [data-reveal="row"]) > :nth-child(2) { --i: 1; }
+  .motion-ready :is([data-reveal="group"], [data-reveal="row"]) > :nth-child(3) { --i: 2; }
+  .motion-ready :is([data-reveal="group"], [data-reveal="row"]) > :nth-child(4) { --i: 3; }
+
+  /* Hairlines draw themselves: a ground-colored cover slides off the real border, so hover
+     colors and layout stay exactly as they were. */
+  .motion-ready .drawn-rule { position: relative; }
+  .motion-ready .drawn-rule::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--ground);
+    scale: 0 1;
+    transform-origin: 100% 50%;
+    pointer-events: none;
+  }
+  .motion-ready .drawn-rule--top::after { top: -1px; bottom: auto; }
+  .motion-ready :is([data-reveal].drawn-rule, [data-reveal] .drawn-rule, .site-header)::after {
+    animation: reveal-rule 1400ms var(--ease-in-out) calc(var(--reveal-delay, 0ms) + var(--rule-delay, 120ms)) backwards var(--reveal-state, running);
+  }
+  .hello-link { --rule-delay: 380ms; }
+
+  /* Scroll-linked details. Values arrive from main.ts as unitless --scroll (px) and --velocity (px/s). */
+  .barcode {
+    translate: calc(var(--scroll, 0) * -.2px) 0;
+    transform: skewX(clamp(-12deg, calc(var(--velocity, 0) * -.003deg), 12deg));
+    will-change: translate, transform;
+  }
+  /* The two rules drift in opposite directions, like a pair of bookends. */
+  .barcode-rule--bottom .barcode { translate: calc(var(--scroll, 0) * .2px - 3000px) 0; }
+  .hero-photo { overflow: hidden; }
+  .hero-photo img { scale: 1.08; translate: 0 calc(min(var(--scroll, 0), 1200) * .2px); will-change: translate; }
+  .margin-star { rotate: calc(var(--scroll, 0) * .08deg); }
+
+  .scroll-progress {
+    display: block;
+    position: fixed;
+    z-index: 30;
+    inset: 0 0 auto;
+    height: 2px;
+    pointer-events: none;
+    opacity: clamp(0, calc(var(--scroll, 0) / 160), 1);
+  }
+  .scroll-progress::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #cedc9700, var(--accent) min(30%, 280px), var(--accent) calc(100% - 56px), #f6f9e9);
+    box-shadow: 0 0 12px #cedc9740;
+    translate: calc((var(--progress, 0) - 1) * 100%) 0;
+    will-change: translate;
+  }
+
+  /* Small signs of life, once the intro has finished. */
+  .status-dot { position: relative; }
+  .status-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--accent);
+    opacity: 0;
+    animation: status-ping 3.2s cubic-bezier(0, 0, .2, 1) 2.2s infinite;
+  }
+  .scroll-link .icon { animation: cue-bob 2.8s var(--ease-in-out) 2.6s infinite; }
+
+  @media (max-width: 520px) {
+    /* The menu opens the same way every time: a clip from the top, then each link. */
+    .motion-ready .site-header .navigation > * { animation-duration: 520ms; animation-delay: calc((var(--i) - 3) * 45ms); }
+    .motion-ready .navigation.is-open { animation: menu-open 460ms var(--ease-out-expo); }
+  }
+
+  @keyframes reveal-rise { from { opacity: 0; translate: 0 var(--reveal-distance, 28px); filter: blur(var(--reveal-blur, 6px)); } }
+  @keyframes reveal-fade { from { opacity: 0; } }
+  @keyframes reveal-drop { from { opacity: 0; translate: 0 -12px; } }
+  @keyframes reveal-slide { from { opacity: 0; translate: 22px 0; filter: blur(5px); } }
+  @keyframes reveal-mask { from { translate: 0 108%; rotate: 5deg; } }
+  @keyframes reveal-pop { from { opacity: 0; scale: .35; } }
+  @keyframes reveal-twirl { from { opacity: 0; scale: .2; rotate: -180deg; } }
+  @keyframes reveal-turn { from { opacity: 0; rotate: -90deg; } }
+  @keyframes reveal-spin { from { opacity: 0; scale: .5; rotate: -200deg; } }
+  @keyframes reveal-tape { from { opacity: 0; scale: 1.35; } }
+  @keyframes reveal-period { from { scale: 0; } 55% { scale: 1.35; } 78% { scale: .9; } }
+  @keyframes reveal-portrait { from { opacity: 0; translate: 0 40px; rotate: -7deg; filter: blur(10px); } }
+  @keyframes reveal-note { from { opacity: 0; translate: 0 30px; rotate: 6deg; filter: blur(6px); } }
+  /* Starts past the end of a 1-unit path, so round caps don't leave a dot behind. */
+  @keyframes reveal-draw { from { stroke-dashoffset: 1.05; } }
+  @keyframes reveal-rule { from { scale: 1 1; } }
+  /* Clip paths don't interpolate to `none`, so these end on an explicit full inset. */
+  @keyframes reveal-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+  @keyframes reveal-wipe-down { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
+  @keyframes menu-open { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 -40px 0); } }
+  @keyframes status-ping {
+    0% { opacity: .5; scale: 1; }
+    75%, 100% { opacity: 0; scale: 3.4; }
+  }
+  @keyframes cue-bob { 50% { translate: 0 3px; } }
+}
+
+@media print {
+  *, *::before, *::after { animation: none !important; }
+  [data-scramble] { -webkit-text-fill-color: currentColor !important; }
+  .scramble-layer, .scroll-progress { display: none !important; }
+}
