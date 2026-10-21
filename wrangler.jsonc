@@ -3,6 +3,10 @@
   "name": "edleidotdev",
   "compatibility_date": "2026-10-04",
   "workers_dev": true,
+  "routes": [
+    { "pattern": "edlei.dev", "custom_domain": true },
+    { "pattern": "www.edlei.dev", "custom_domain": true }
+  ],
   "build": {
     "command": "pnpm run build"
   },
