@@ -17,6 +17,9 @@
   --text-small: .875rem;
   --text-caption: .75rem;
   --inset: clamp(24px, 5.4vw, 76px);
+  --header-h: 100px;
+  --hero-min: 672px;
+  --shell-offset: 0px;
 }
 
 * { box-sizing: border-box; }
@@ -44,7 +47,7 @@ svg { display: block; flex-shrink: 0; }
 .skip-link:focus { transform: none; }
 
 /* A quiet navigation above the much louder introduction. */
-.site-header { display: flex; align-items: center; padding: 0 var(--inset); height: 100px; border-bottom: 1px solid var(--line); position: relative; z-index: 5; }
+.site-header { display: flex; align-items: center; padding: 0 var(--inset); height: var(--header-h); border-bottom: 1px solid var(--line); position: relative; z-index: 5; }
 .header-brand { position: relative; flex-shrink: 0; }
 .wordmark { font-size: 24px; font-weight: 700; letter-spacing: -1.1px; white-space: nowrap; }
 .wordmark-dot { color: var(--accent); }
@@ -61,7 +64,7 @@ svg { display: block; flex-shrink: 0; }
 .menu-toggle { display: none; }
 
 /* The portrait is deliberately a placeholder, ready for a personal photo. */
-.hero { position: relative; isolation: isolate; padding: 89px var(--inset) 31px; min-height: 672px; }
+.hero { position: relative; isolation: isolate; padding: 89px var(--inset) 31px; min-height: var(--hero-min); }
 .hero-copy { position: relative; z-index: 2; width: fit-content; }
 .hero-greeting { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; }
 .status-dot { height: 6px; width: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px #cedc970b; }
@@ -115,7 +118,7 @@ h1 { font-family: var(--display); font-size: clamp(54px, 7.9vw, 108px); letter-s
 .about { padding-top: 88px; padding-bottom: 89px; }
 .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; }
 .eyebrow { display: flex; gap: 16px; align-items: center; font: var(--text-caption)/1.5 var(--mono); letter-spacing: 1.1px; color: var(--muted); }
-.eyebrow > span { color: var(--accent); }
+.eyebrow > span:first-child { color: var(--accent); }
 h2 { font: 400 clamp(35px, 4.1vw, 56px)/1.18 var(--display); letter-spacing: -.05em; margin-top: 15px; }
 .section-anchor { display: inline-block; margin-left: 12px; font-family: 'Roboto', sans-serif; font-size: .45em; font-weight: 400; vertical-align: middle; color: var(--faint); transition: color 160ms; }
 .section-anchor:hover, .section-anchor:focus-visible { color: var(--accent); }
@@ -271,7 +274,7 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
 .footer-colophon { font: italic var(--text-small) 'Roboto', sans-serif; color: #8f9980; margin-top: 25px; }
 
 /* Popovers live outside the page frame so they can never be clipped. */
-.tooltip { position: fixed; z-index: 20; width: max-content; max-width: min(340px, calc(100vw - 32px)); background: #e4e8d7; color: #30362a; border: 1px solid #eef2e4; box-shadow: 0 8px 35px #0005; padding: 17px 20px; font-size: var(--text-small); line-height: 1.7; }
+.tooltip { position: fixed; z-index: 20; width: max-content; max-width: min(340px, calc(100vw - 32px)); background: #e4e8d7; color: #30362a; border: 1px solid #eef2e4; box-shadow: 0 8px 35px #0005; padding: 17px 20px; font-size: var(--text-small); line-height: 1.7; white-space: pre-line; }
 #note-time { min-width: 250px; }
 #note-time > span, #note-time > strong { display: block; }
 .unix-line { margin-top: 10px; padding-top: 9px; border-top: 1px solid #b6c0a4; font-size: var(--text-caption); }
@@ -286,14 +289,15 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
 .dialog-done .icon { width: 14px; height: 14px; }
 
 @media (min-width: 1500px) {
-  .site-shell { margin-block: 28px; }
+  :root { --shell-offset: 28px; }
+  .site-shell { margin-block: var(--shell-offset); }
   .site-header { border-top: 1px solid var(--line); }
   .site-footer { border-bottom: 1px solid var(--line); }
 }
 
 @media (max-width: 1100px) {
   .header-note { display: none; font-size: var(--text-caption); }
-  .hero { min-height: 650px; }
+  :root { --hero-min: 650px; }
   .hero-prose { max-width: 620px; font-size: var(--text-body); }
   .portrait-placeholder { width: 222px; right: 4%; top: 108px; opacity: .35; }
   .portrait-frame { height: 320px; }
@@ -319,12 +323,12 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
 
 @media (max-width: 760px) {
   :root { --inset: 30px; }
-  .site-header { height: 82px; }
+  :root { --header-h: 82px; --hero-min: 610px; }
   .wordmark { font-size: 22px; }
   .wordmark-greeting { left: 0; top: calc(100% + 3px); translate: none; font-size: var(--text-caption); }
   .navigation { gap: 19px; }
   .navigation a, .navigation button { font-size: var(--text-small); }
-  .hero { min-height: 610px; padding-top: 75px; }
+  .hero { padding-top: 75px; }
   h1 { font-size: clamp(47px, 8.6vw, 65px); letter-spacing: -.055em; margin-top: 21px; margin-left: -2px; }
   .hero-greeting { font-size: 16px; }
   .hero-prose { max-width: 575px; font-size: var(--text-body); margin-top: 30px; }
@@ -380,14 +384,14 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
 
 @media (max-width: 520px) {
   :root { --inset: 23px; }
-  .site-header { height: 75px; }
+  :root { --header-h: 75px; --hero-min: 625px; }
   .wordmark-greeting { left: calc(100% + 14px); top: 50%; translate: 0 -50%; }
   .menu-toggle { display: grid; place-items: center; margin-left: auto; width: 36px; height: 36px; }
   .menu-toggle .icon { width: 23px; height: 23px; }
   .navigation { display: none; position: absolute; top: 74px; left: 0; right: 0; padding: 16px var(--inset) 21px; background: #1b1e17; border-bottom: 1px solid #50583e; box-shadow: 0 10px 20px #0003; }
   .navigation.is-open { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
   .navigation a, .navigation button { font-size: var(--text-small); padding-block: 6px; }
-  .hero { padding-top: 56px; padding-bottom: 28px; min-height: 625px; }
+  .hero { padding-top: 56px; padding-bottom: 28px; }
   .hero-greeting { font-size: 15px; }
   h1 { font-size: clamp(39px, 10.7vw, 55px); margin-top: 20px; }
   .hero-meta { gap: 11px; margin-top: 21px; }
