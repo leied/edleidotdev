@@ -92,7 +92,7 @@ h1 { font-family: var(--display); font-size: clamp(54px, 7.9vw, 108px); letter-s
 .hero-photo { position: absolute; inset: 0; z-index: -1; }
 .hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 62%; }
 /* The photo's subject sits on the left, so the copy moves right and the scrim is darkest behind it. */
-.hero-scrim { position: absolute; inset: 0; background: linear-gradient(270deg, rgb(0 0 0 / .72), rgb(0 0 0 / .52) 55%, rgb(0 0 0 / .28)); }
+.hero-scrim { position: absolute; inset: 0; background: linear-gradient(270deg, rgb(0 0 0 / .8), rgb(0 0 0 / .62) 55%, rgb(0 0 0 / .4)); }
 @media (min-width: 521px) {
   .hero-photo ~ .hero-copy { margin-left: auto; }
   .hero-photo ~ .hero-bottom { justify-content: flex-end; }
