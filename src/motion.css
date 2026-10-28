@@ -4,7 +4,7 @@
 @media (prefers-reduced-motion: no-preference) {
   :root { --ease-hover: cubic-bezier(.2, .7, .2, 1); }
 
-  .name-period, .replay-glyph {
+  .replay-glyph {
     display: inline-block;
     transition: transform 320ms var(--ease-hover), color 180ms;
   }
@@ -96,8 +96,6 @@
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  h1:hover .name-period { transform: translateY(-5px) rotate(-9deg); }
-
   .navigation :is(a, button):hover::after,
   .footer-links :is(a, button):hover::after,
   .project-links :is(a, button):hover::after { transform: scaleX(1); }

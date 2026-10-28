@@ -3,6 +3,7 @@ import '@fontsource/roboto/latin-400-italic.css';
 import '@fontsource/roboto/latin-500.css';
 import '@fontsource/roboto/latin-700.css';
 import '@fontsource/archivo-black/latin-400.css';
+import '@fontsource/anta/latin-400.css';
 import '@fontsource/libre-barcode-39-extended/latin-400.css';
 import './style.css';
 import './motion.css';
@@ -54,7 +55,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         </div>`}
         <div class="hero-copy">
           <p class="hero-greeting"><span class="status-dot"></span> Hey there,</p>
-          <h1 id="hero-title">I’m Edward L<span class="name-period">.</span></h1>
+          <h1 id="hero-title">I’m Edward L</h1>
           <div class="hero-meta">
             <span>${icon('pin')} ${profile.location}</span>
             <span class="meta-divider" aria-hidden="true">/</span>
