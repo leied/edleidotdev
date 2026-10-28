@@ -91,8 +91,12 @@ h1 { font-family: var(--display); font-size: clamp(54px, 7.9vw, 108px); letter-s
 .hero-aside em { color: #b2b6a5; }
 .hero-photo { position: absolute; inset: 0; z-index: -1; }
 .hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 62%; }
-/* Darkest behind the copy on the left, lighter over the skyline. */
-.hero-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgb(0 0 0 / .72), rgb(0 0 0 / .52) 55%, rgb(0 0 0 / .28)); }
+/* The photo's subject sits on the left, so the copy moves right and the scrim is darkest behind it. */
+.hero-scrim { position: absolute; inset: 0; background: linear-gradient(270deg, rgb(0 0 0 / .72), rgb(0 0 0 / .52) 55%, rgb(0 0 0 / .28)); }
+@media (min-width: 521px) {
+  .hero-photo ~ .hero-copy { margin-left: auto; }
+  .hero-photo ~ .hero-bottom { justify-content: flex-end; }
+}
 .portrait-placeholder { position: absolute; right: 5.4%; top: 88px; width: 265px; z-index: 0; transform: rotate(7deg); color: #717565; opacity: .73; }
 .portrait-frame { height: 365px; border: 1px solid #393e30; position: relative; background: repeating-linear-gradient(0deg, transparent 0px 29px, #373b301f 29px 30px), repeating-linear-gradient(90deg, transparent 0px 29px, #373b301f 29px 30px); }
 .portrait-frame::before { content: ''; position: absolute; width: 70px; height: 23px; left: 91px; top: -12px; background: #858c6330; border-inline: 1px dashed #858c633b; transform: rotate(-11deg); }

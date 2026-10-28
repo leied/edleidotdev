@@ -33,7 +33,7 @@ Reference: [Cloudflare static assets](https://developers.cloudflare.com/workers/
 ## Make it yours
 
 - Edit `src/content.ts` for personal links, featured and other project summaries, broad skills, and the portrait path. Blank personal URLs open an explicit “coming soon” notice. Project `links` contain verified public destinations; `privateSource` labels repositories that visitors cannot access.
-- Place your photo in `public/images/`, then set `profile.portrait` to `/images/your-photo.jpg`. The hero uses it as a full background photo beneath a black gradient that is darkest behind the copy on the left. With no path set, a drawn placeholder occupies the photo area.
+- Place your photo in `public/images/`, then set `profile.portrait` to `/images/your-photo.jpg`. The hero uses it as a full background photo; above phone width the copy sits on the right, over the darkest part of a black gradient, leaving the photo's left side clear. With no path set, a drawn placeholder occupies the photo area.
 - Edit the introduction and short About notes in `src/main.ts`. Keep the public bio focused on interests; leave organization history, dates, detailed school history, and private contact information off the page and out of hover text.
 - The fonts are Roboto, Archivo Black, and Libre Barcode 39 Extended, served locally from the build.
 
