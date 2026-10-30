@@ -12,6 +12,7 @@
   --line: #33352e;
   --ground: #141513;
   --display: 'Archivo Black', sans-serif;
+  --brand: 'Anta', sans-serif;
   --mono: 'Roboto', sans-serif;
   --text-body: 1rem;
   --text-small: .875rem;
@@ -46,7 +47,7 @@ svg { display: block; flex-shrink: 0; }
 /* A quiet navigation above the much louder introduction. */
 .site-header { display: flex; align-items: center; padding: 0 var(--inset); height: 100px; border-bottom: 1px solid var(--line); position: relative; z-index: 5; }
 .header-brand { position: relative; flex-shrink: 0; }
-.wordmark { font-size: 24px; font-weight: 700; letter-spacing: -1.1px; white-space: nowrap; }
+.wordmark { font: 400 24px var(--brand); letter-spacing: -.2px; white-space: nowrap; }
 .wordmark-dot { color: var(--accent); }
 .wordmark-greeting { position: absolute; left: calc(100% + 18px); top: 50%; translate: 0 -50%; color: var(--accent); font-size: var(--text-small); font-style: italic; white-space: nowrap; pointer-events: none; opacity: 0; visibility: hidden; transform: translate(-6px, 3px); }
 .header-brand.is-greeting .wordmark-greeting { opacity: 1; visibility: visible; transform: translate(0, 0); }
@@ -60,13 +61,12 @@ svg { display: block; flex-shrink: 0; }
 .navigation .nav-contact { color: var(--accent); }
 .menu-toggle { display: none; }
 
-/* The portrait is deliberately a placeholder, ready for a personal photo. */
+/* The hero shows profile.portrait as its background, or a drawn placeholder without one. */
 .hero { position: relative; isolation: isolate; padding: 89px var(--inset) 31px; min-height: 672px; }
 .hero-copy { position: relative; z-index: 2; width: fit-content; }
 .hero-greeting { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; }
 .status-dot { height: 6px; width: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px #cedc970b; }
-h1 { font-family: var(--display); font-size: clamp(54px, 7.9vw, 108px); letter-spacing: -.067em; line-height: 1.15; margin-top: 16px; margin-left: -5px; font-weight: 400; }
-.name-period { color: var(--accent); }
+h1 { font-family: var(--brand); font-size: clamp(54px, 7.9vw, 108px); letter-spacing: -.02em; line-height: 1.15; margin-top: 16px; margin-left: -5px; font-weight: 400; }
 .hero-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; margin-top: 23px; color: #c4c6ba; }
 .hero-meta > span { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-small); }
 .hero-meta .icon { width: 16px; height: 16px; color: var(--muted); }
@@ -90,8 +90,14 @@ h1 { font-family: var(--display); font-size: clamp(54px, 7.9vw, 108px); letter-s
 .hero-aside { font: italic var(--text-small) 'Roboto', sans-serif; color: #919585; }
 .hero-aside em { color: #b2b6a5; }
 .hero-photo { position: absolute; inset: 0; z-index: -1; }
-.hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 78% center; }
-.hero-scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .8); }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 62%; }
+/* The photo's subject sits on the left, so the copy moves right and the scrim is darkest behind it. */
+.hero-scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .72); }
+@media (min-width: 521px) {
+  .hero-scrim { background: linear-gradient(270deg, rgb(0 0 0 / .88), rgb(0 0 0 / .8) 52%, rgb(0 0 0 / .35) 76%, rgb(0 0 0 / .18)); }
+  .hero-photo ~ .hero-copy { margin-left: auto; }
+  .hero-photo ~ .hero-bottom { justify-content: flex-end; }
+}
 .portrait-placeholder { position: absolute; right: 5.4%; top: 88px; width: 265px; z-index: 0; transform: rotate(7deg); color: #717565; opacity: .73; }
 .portrait-frame { height: 365px; border: 1px solid #393e30; position: relative; background: repeating-linear-gradient(0deg, transparent 0px 29px, #373b301f 29px 30px), repeating-linear-gradient(90deg, transparent 0px 29px, #373b301f 29px 30px); }
 .portrait-frame::before { content: ''; position: absolute; width: 70px; height: 23px; left: 91px; top: -12px; background: #858c6330; border-inline: 1px dashed #858c633b; transform: rotate(-11deg); }
@@ -325,7 +331,7 @@ h3 { font: 400 20px/1.25 var(--display); letter-spacing: -.035em; }
   .navigation { gap: 19px; }
   .navigation a, .navigation button { font-size: var(--text-small); }
   .hero { min-height: 610px; padding-top: 75px; }
-  h1 { font-size: clamp(47px, 8.6vw, 65px); letter-spacing: -.055em; margin-top: 21px; margin-left: -2px; }
+  h1 { font-size: clamp(47px, 8.6vw, 65px); margin-top: 21px; margin-left: -2px; }
   .hero-greeting { font-size: 16px; }
   .hero-prose { max-width: 575px; font-size: var(--text-body); margin-top: 30px; }
   .hero-prose ul { max-width: 530px; }

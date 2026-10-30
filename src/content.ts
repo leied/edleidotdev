@@ -9,8 +9,8 @@ export const profile = {
   location: 'Pacific Northwest',
   timezone: 'America/Los_Angeles',
   // Put your photo in public/images and set its path here, e.g. '/images/edward.jpg'.
-  // The hero places the subject on the right beneath an 80% black overlay.
-  portrait: '',
+  // The hero shows it full-bleed; above phone width the copy moves right so the photo's left side stays clear.
+  portrait: '/images/hero.webp',
   links: {
     github: 'https://github.com/leied',
     linkinbio: '',
